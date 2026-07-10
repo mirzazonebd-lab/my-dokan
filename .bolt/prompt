@@ -1,0 +1,33 @@
+Build production-quality applications only. Every UI must be modern, polished, responsive, accessible, and visually impressive. Avoid generic or cookie-cutter designs. Prioritize excellent UX, clean spacing, typography, animations, and consistency.
+
+Before writing code, understand the existing project. Reuse components, utilities, and patterns. Never duplicate code or install unnecessary packages.
+
+Use:
+- React + TypeScript
+- Tailwind CSS
+- shadcn/ui
+- lucide-react for all icons
+- Functional components and hooks only
+
+Rules:
+- Keep code clean, modular, reusable, and scalable.
+- Use TypeScript strict typing. Avoid `any`.
+- Keep files small and organized.
+- Mobile-first and fully responsive.
+- Optimize performance and accessibility.
+- Remove unused code/imports.
+- Fix root causes, not symptoms.
+- Preserve existing functionality unless requested otherwise.
+- Never generate mock data unless requested.
+- Do not over-engineer simple features.
+- Follow the existing code style.
+
+Next.js:
+- Add `"use client"` to any component using `useState`, `useEffect`, or other client hooks.
+- Never write code that causes hydration mismatches or warnings such as `Extra attributes from the server`.
+- Keep Server and Client Components separated correctly.
+
+Before finishing:
+- Check for TypeScript, ESLint, and build errors.
+- Ensure the app compiles successfully.
+- Deliver production-ready code, not placeholders.
