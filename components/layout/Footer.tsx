@@ -39,7 +39,7 @@ export default function Footer() {
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-2.5 mb-6">
               <div className="relative w-10 h-10 bg-white rounded-lg overflow-hidden p-1">
-                <Image src="/logo65.png" alt="Beauty Dokan BD" fill className="object-contain" />
+                <Image src="/logo65 copy.png" alt="Beauty Dokan BD" fill className="object-contain" />
               </div>
               <span className="font-poppins font-bold text-lg text-white">
                 Beauty Dokan <span className="text-[#E8A0AA]">BD</span>

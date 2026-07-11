@@ -20,15 +20,15 @@ export const metadata: Metadata = {
   description:
     "Your Trusted Destination for Premium Beauty Products. Discover authentic global skincare, makeup, hair care, body care and men's grooming—all in one place.",
   icons: {
-    icon: [{ url: '/logo65.png', type: 'image/png', sizes: '65x65' }],
-    shortcut: '/logo65.png',
-    apple: '/logo65.png',
+    icon: [{ url: '/logo65 copy.png', type: 'image/png', sizes: '65x65' }],
+    shortcut: '/logo65 copy.png',
+    apple: '/logo65 copy.png',
   },
   openGraph: {
     title: 'Beauty Dokan BD – Premium Beauty & Skincare',
     description: 'Your Trusted Destination for Premium Beauty Products.',
     siteName: 'Beauty Dokan BD',
-    images: [{ url: '/logo.png' }],
+    images: [{ url: '/logo65 copy.png' }],
   },
 };
 
