@@ -317,7 +317,7 @@ export default function Header() {
             <div className="flex items-center justify-between p-4 border-b border-rose-100">
               <Link href="/" onClick={() => setMobileOpen(false)} className="flex items-center gap-2">
                 <div className="relative w-10 h-10">
-                  <Image src="/logo.png" alt="Beauty Dokan BD" fill className="object-contain" />
+                  <Image src="/logo65.png" alt="Beauty Dokan BD" fill className="object-contain" />
                 </div>
                 <span className="font-poppins font-semibold text-[#1C1C2E]">
                   Beauty Dokan <span className="text-[#C4818A]">BD</span>
