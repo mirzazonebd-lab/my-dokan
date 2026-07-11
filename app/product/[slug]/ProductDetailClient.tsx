@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useCart } from '@/components/cart/CartStore';
 import Image from 'next/image';
 import { Heart, ShoppingBag, Share2, Star, Check, ChevronDown, Truck, RefreshCw, Shield, Package, Smartphone, CreditCard, ArrowRight, Plus, Minus, Copy, Facebook, CircleCheck as CheckCircle2, Info, Clock, MapPin, Eye } from 'lucide-react';
 import { Product } from '@/lib/data/types';
@@ -145,9 +147,27 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
     return () => observer.disconnect();
   }, []);
 
-  const handleAddToCart = () => {
+  const { addItem } = useCart();
+  const router = useRouter();
+
+  const handleAddToCart = async () => {
+    try {
+      await addItem(product, qty);
+    } catch (err) {
+      // ignore failures for now
+    }
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2500);
+  };
+
+  const handleBuyNow = async (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    try {
+      await addItem(product, qty);
+    } catch (err) {
+      // ignore
+    }
+    router.push('/checkout');
   };
 
   const handleCopyLink = () => {
@@ -328,13 +348,13 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                 </button>
               </div>
 
-              <Link
-                href={`/checkout?product=${product.id}&qty=${qty}`}
-                className="flex items-center justify-center gap-2 w-full h-11 rounded-xl border-2 border-[#C4818A] text-[#C4818A] hover:bg-[#C4818A] hover:text-white font-semibold text-sm transition-all duration-300"
-              >
-                Buy Now — ৳{(product.price * qty).toLocaleString()}
-                <ArrowRight size={16} />
-              </Link>
+                <button
+                  onClick={handleBuyNow}
+                  className="flex items-center justify-center gap-2 w-full h-11 rounded-xl border-2 border-[#C4818A] text-[#C4818A] hover:bg-[#C4818A] hover:text-white font-semibold text-sm transition-all duration-300"
+                >
+                  Buy Now — ৳{(product.price * qty).toLocaleString()}
+                  <ArrowRight size={16} />
+                </button>
             </div>
 
             {/* Payment Methods */}
@@ -575,12 +595,12 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
               <ShoppingBag size={15} />
               <span className="hidden sm:inline">{addedToCart ? 'Added!' : 'Add to Cart'}</span>
             </button>
-            <Link
-              href={`/checkout?product=${product.id}&qty=${qty}`}
+            <button
+              onClick={handleBuyNow}
               className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-semibold text-sm bg-[#C4818A] text-white hover:bg-[#B06E77] transition-colors"
             >
               Buy Now
-            </Link>
+            </button>
             <button
               onClick={() => setWishlisted(w => !w)}
               className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-all ${
