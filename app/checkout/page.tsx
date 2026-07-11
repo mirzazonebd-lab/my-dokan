@@ -8,7 +8,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChevronRight, ChevronLeft, Check, Loader as Loader2, User, Phone, Mail, MapPin, Truck, CreditCard, ShoppingBag, Tag, Sparkles, Package } from 'lucide-react';
-import { useCart } from '@/components/cart/CartStore';
 import { BANGLADESH_DISTRICTS } from '@/lib/demo-data';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -282,14 +281,17 @@ function OrderSummary({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter();
-  const { items, subtotal, clearCart, addItem } = useCart();
+  const { items, subtotal, clearCart, addItem, loading: cartLoading } = useCart();
   const searchParams = useSearchParams();
 
   const [step, setStep]             = useState<Step>('cart');
   const [mounted, setMounted]       = useState(false);
   const [loading, setLoading]       = useState(false);
+  const [hasHydratedFromUrl, setHasHydratedFromUrl] = useState(false);
+  const [urlHydrationInProgress, setUrlHydrationInProgress] = useState(false);
+
 
   // Customer info
   const [info, setInfo]             = useState<CustomerInfo>({ fullName: '', mobile: '', email: '' });
@@ -309,33 +311,54 @@ export default function CheckoutPage() {
   const [discount, setDiscount]           = useState(0);
 
   useEffect(() => { setMounted(true); }, []);
+
+  
   // Fallback: if cart is empty but product and qty provided in URL, add item.
+  const tryHydrateFromUrl = async () => {
+    try {
+      if (!mounted) return;
+      if (hasHydratedFromUrl) return;
+      if (items.length > 0) return;
+      const productId = searchParams.get('product');
+      const qtyParam = searchParams.get('qty');
+      if (!productId || !qtyParam) return;
+      const qty = parseInt(qtyParam, 10);
+      if (Number.isNaN(qty) || qty < 1) return;
+
+      const { products } = await import('@/lib/data/products');
+      const prod = (products as Product[]).find(p => p.id === productId || p.slug === productId);
+      if (!prod) return;
+
+      await addItem(prod, qty);
+      setHasHydratedFromUrl(true);
+      setStep('info');
+      router.replace('/checkout');
+    } catch (err) {
+      // ignore fallback failures
+    }
+  };
+
+  // Run URL hydration once when mounted or when searchParams change.
   useEffect(() => {
-    const tryHydrateFromUrl = async () => {
+    let cancelled = false;
+    const run = async () => {
+      setUrlHydrationInProgress(true);
       try {
-        if (!mounted) return;
-        if (items.length > 0) return;
-        const productId = searchParams.get('product');
-        const qtyParam = searchParams.get('qty');
-        if (!productId || !qtyParam) return;
-        const qty = parseInt(qtyParam, 10);
-        if (Number.isNaN(qty) || qty < 1) return;
-
-        const { products } = await import('@/lib/data/products');
-        const prod = (products as Product[]).find(p => p.id === productId || p.slug === productId);
-        if (!prod) return;
-
-        await addItem(prod, qty);
-      } catch (err) {
-        // ignore fallback failures
+        await tryHydrateFromUrl();
+      } finally {
+        if (!cancelled) setUrlHydrationInProgress(false);
       }
     };
 
-    tryHydrateFromUrl();
-  }, [mounted, items.length, searchParams, addItem]);
+    if (mounted) run();
+    else setUrlHydrationInProgress(false);
+
+    return () => { cancelled = true; };
+  }, [mounted, searchParams, addItem]);
   useEffect(() => {
-    if (mounted && items.length === 0 && step !== 'review') router.push('/shop');
-  }, [mounted, items.length, step, router]);
+    // Wait for cart provider and URL hydration attempt to finish before redirecting away from checkout
+    if (mounted && !cartLoading && !urlHydrationInProgress && items.length === 0 && step !== 'review') router.push('/shop');
+  }, [mounted, cartLoading, urlHydrationInProgress, items.length, step, router]);
 
   const shippingCost = ship.district ? calcShipping(ship.district) : SHIPPING_INSIDE;
   const grandTotal   = subtotal + shippingCost - discount;
@@ -453,10 +476,29 @@ export default function CheckoutPage() {
   };
 
   if (!mounted) return null;
+
+  // While the cart provider is hydrating, show a loading state so the checkout
+  // form doesn't disappear and cause a confusing blank screen.
+  if (cartLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+
+        <main className="max-w-6xl mx-auto px-4 py-10">
+          <div className="rounded-3xl bg-white border border-gray-100 p-10 text-center">
+            <p className="text-lg font-semibold text-gray-900 mb-3">Restoring your cart…</p>
+            <p className="text-gray-500">Please wait while we restore your saved items.</p>
+          </div>
+        </main>
+
+        <Footer />
+      </div>
+    );
+  }
+
   if (items.length === 0 && step !== 'review') return null;
 
   return (
-    <ClientWrapper>
       <div className="min-h-screen bg-gray-50">
         <Header />
 
@@ -816,6 +858,13 @@ export default function CheckoutPage() {
 
         <Footer />
       </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <ClientWrapper>
+      <CheckoutContent />
     </ClientWrapper>
   );
 }

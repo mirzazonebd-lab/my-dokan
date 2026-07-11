@@ -9,6 +9,7 @@ import { Heart, ShoppingBag, Share2, Star, Check, ChevronDown, Truck, RefreshCw,
 import { Product } from '@/lib/data/types';
 import { getReviewsForProduct } from '@/lib/data/reviews';
 import ImageGallery from './ImageGallery';
+import { products as allProducts } from '@/lib/data/products';
 
 interface ProductDetailClientProps {
   product: Product;
@@ -132,7 +133,6 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
   const reviews = getReviewsForProduct(product.id);
   const recentlyViewedIds = useRecentlyViewed(product.id);
 
-  const { products: allProducts } = require('@/lib/data/products');
   const recentlyViewed = recentlyViewedIds
     .map((id: string) => allProducts.find((p: Product) => p.id === id))
     .filter(Boolean)
@@ -164,10 +164,10 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
     e?.preventDefault();
     try {
       await addItem(product, qty);
+      router.push(`/checkout?product=${encodeURIComponent(product.slug)}&qty=${qty}`);
     } catch (err) {
-      // ignore
+      // ignore failures for now
     }
-    router.push('/checkout');
   };
 
   const handleCopyLink = () => {

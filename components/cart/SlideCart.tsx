@@ -76,7 +76,7 @@ export default function SlideCart({ open, onOpenChange }: SlideCartProps) {
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-[#C4818A] font-medium">{item.product.brand}</p>
                     <Link
-                      href={`/product/${item.product_id}`}
+                      href={`/product/${item.product.slug}`}
                       onClick={() => onOpenChange(false)}
                       className="text-sm font-medium text-gray-900 hover:text-[#C4818A] line-clamp-2"
                     >

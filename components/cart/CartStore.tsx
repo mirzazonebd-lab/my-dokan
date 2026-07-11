@@ -68,12 +68,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       } catch {
         localStorage.removeItem(CART_STORAGE_KEY);
       }
-
       setLoading(false);
     };
 
     loadCart();
   }, [getProducts]);
+
+  
 
   // Save cart to localStorage whenever items change
   useEffect(() => {
