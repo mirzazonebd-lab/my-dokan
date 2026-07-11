@@ -72,7 +72,7 @@ export default function ProductCard({ product, variant = 'default', onQuickView 
           <p className="text-[10px] font-semibold text-[#C4818A] uppercase tracking-wider mb-1">
             {product.brand}
           </p>
-          <Link href={`/product/${product.id}`}>
+          <Link href={`/product/${product.slug}`}>
             <h3 className="text-sm font-medium text-gray-800 hover:text-[#C4818A] transition-colors line-clamp-1">
               {product.name}
             </h3>
@@ -243,7 +243,7 @@ export default function ProductCard({ product, variant = 'default', onQuickView 
         <p className="text-[10px] font-semibold text-[#C4818A] uppercase tracking-wider mb-1">
           {product.brand}
         </p>
-        <Link href={`/product/${product.id}`}>
+        <Link href={`/product/${product.slug}`}>
           <h3 className="text-sm font-medium text-gray-800 line-clamp-2 hover:text-[#C4818A] transition-colors leading-snug mb-2">
             {product.name}
           </h3>
