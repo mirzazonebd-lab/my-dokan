@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Product } from '@/lib/data/types';
+import { useCart } from '@/components/cart/CartStore';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -281,7 +284,8 @@ function OrderSummary({
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, subtotal, clearCart } = useCart();
+  const { items, subtotal, clearCart, addItem } = useCart();
+  const searchParams = useSearchParams();
 
   const [step, setStep]             = useState<Step>('cart');
   const [mounted, setMounted]       = useState(false);
@@ -305,6 +309,30 @@ export default function CheckoutPage() {
   const [discount, setDiscount]           = useState(0);
 
   useEffect(() => { setMounted(true); }, []);
+  // Fallback: if cart is empty but product and qty provided in URL, add item.
+  useEffect(() => {
+    const tryHydrateFromUrl = async () => {
+      try {
+        if (!mounted) return;
+        if (items.length > 0) return;
+        const productId = searchParams.get('product');
+        const qtyParam = searchParams.get('qty');
+        if (!productId || !qtyParam) return;
+        const qty = parseInt(qtyParam, 10);
+        if (Number.isNaN(qty) || qty < 1) return;
+
+        const { products } = await import('@/lib/data/products');
+        const prod = (products as Product[]).find(p => p.id === productId || p.slug === productId);
+        if (!prod) return;
+
+        await addItem(prod, qty);
+      } catch (err) {
+        // ignore fallback failures
+      }
+    };
+
+    tryHydrateFromUrl();
+  }, [mounted, items.length, searchParams, addItem]);
   useEffect(() => {
     if (mounted && items.length === 0 && step !== 'review') router.push('/shop');
   }, [mounted, items.length, step, router]);
