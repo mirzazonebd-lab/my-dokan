@@ -104,7 +104,7 @@ function SearchDropdown({ query, onClose }: { query: string; onClose: () => void
   if (matchedProducts.length === 0 && matchedCategories.length === 0 && matchedBrands.length === 0) {
     return (
       <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-100 p-4 z-50">
-        <p className="text-center text-gray-500 text-sm">No results for "{query}"</p>
+        <p className="text-center text-gray-500 text-sm">No results for &quot;{query}&quot;</p>
       </div>
     );
   }

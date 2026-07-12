@@ -35,7 +35,7 @@ export default function SlideCart({ open, onOpenChange }: SlideCartProps) {
               <ShoppingBag size={32} className="text-[#C4818A]" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Your cart is empty</h3>
-            <p className="text-gray-500 text-center mb-6">Looks like you haven't added anything to your cart yet.</p>
+            <p className="text-gray-500 text-center mb-6">Looks like you haven&apos;t added anything to your cart yet.</p>
             <Button onClick={() => onOpenChange(false)} asChild>
               <Link href="/shop" className="flex items-center gap-2">
                 Start Shopping <ArrowRight size={16} />

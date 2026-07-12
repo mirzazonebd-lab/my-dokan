@@ -147,7 +147,7 @@ export default function LiveSearch({ isOpen, onClose }: LiveSearchProps) {
               )}
 
               {results.products.length === 0 && results.categories.length === 0 && results.brands.length === 0 && (
-                <p className="text-center text-gray-500 py-8">No results found for "{query}"</p>
+                <p className="text-center text-gray-500 py-8">No results found for &quot;{query}&quot;</p>
               )}
             </div>
           ) : (
