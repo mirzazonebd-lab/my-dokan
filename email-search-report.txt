@@ -1,0 +1,13 @@
+C:\Users\Araf Mirza\my-dokan\package-lock.json:4402:"deprecated": "Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me",
+C:\Users\Araf Mirza\my-dokan\app\admin\customers\page.tsx:33:email: 'fatima@example.com',
+C:\Users\Araf Mirza\my-dokan\app\admin\customers\page.tsx:42:email: 'rahim@example.com',
+C:\Users\Araf Mirza\my-dokan\app\admin\customers\page.tsx:51:email: 'sarah@example.com',
+C:\Users\Araf Mirza\my-dokan\app\admin\customers\page.tsx:60:email: 'nadim@example.com',
+C:\Users\Araf Mirza\my-dokan\app\admin\login\page.tsx:26:placeholder="admin@example.com"
+C:\Users\Araf Mirza\my-dokan\app\admin\settings\page.tsx:13:storeEmail: 'beautydokanbd.online@gmail.com',
+C:\Users\Araf Mirza\my-dokan\app\auth\signin\page.tsx:61:placeholder="your@email.com"
+C:\Users\Araf Mirza\my-dokan\app\auth\signup\page.tsx:120:placeholder="your@email.com"
+C:\Users\Araf Mirza\my-dokan\app\checkout\page.tsx:589:placeholder="email@example.com"
+C:\Users\Araf Mirza\my-dokan\app\checkout\success\page.tsx:121:<p style="margin-top:4px">beautydokanbd.online@gmail.com • 01712-012737</p>
+C:\Users\Araf Mirza\my-dokan\components\layout\Footer.tsx:62:<span>beautydokanbd.online@gmail.com</span>
+C:\Users\Araf Mirza\my-dokan\lib\demo-data.ts:92:email: 'demo@beautydokanbd.com',

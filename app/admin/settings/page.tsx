@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch';
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState({
     storeName: 'Beauty Dokan BD',
-    storeEmail: 'beautydokanbd.online@gmail.com',
+    storeEmail: 'info@beautydokan.com',
     storePhone: '+8801712012737',
     freeShippingThreshold: 1500,
     deliveryCharge: 60,

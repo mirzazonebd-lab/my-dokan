@@ -59,7 +59,7 @@ export default function Footer() {
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-400">
                 <Mail size={14} className="text-[#E8A0AA]" />
-                <span>beautydokanbd.online@gmail.com</span>
+                <span>info@beautydokan.com</span>
               </div>
             </div>
           </div>
