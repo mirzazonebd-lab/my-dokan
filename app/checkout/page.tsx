@@ -329,7 +329,7 @@ function CheckoutContent() {
       const prod = (products as Product[]).find(p => p.id === productId || p.slug === productId);
       if (!prod) return;
 
-      await addItem(prod, qty);
+      // await addItem(prod, qty);
       setHasHydratedFromUrl(true);
       setStep('info');
       router.replace('/checkout');
