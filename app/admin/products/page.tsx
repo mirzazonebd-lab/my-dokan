@@ -3,17 +3,51 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Plus, Search, CreditCard as Edit, Trash2, Eye, Filter } from 'lucide-react';
-import { products } from '@/lib/data/products';
+import { Plus, Search, CreditCard as Edit, Trash2, Eye, Filter, Loader as Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase/client';
 import AdminLayout from '../AdminShell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+
+interface Product {
+  id: string;
+  slug: string;
+  name: string;
+  brand: string;
+  category: string;
+  price: number;
+  originalPrice?: number;
+  stockStatus: string;
+  badge?: string;
+  image: string;
+}
 
 export default function AdminProductsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterBrand, setFilterBrand] = useState('all');
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('id, slug, name, brand, category, price, originalPrice, stockStatus, badge, image');
+        if (!cancelled && !error && data) {
+          setProducts(data as Product[]);
+        }
+      } catch {
+        // keep empty list on error
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   // Get unique categories and brands
   const categories = Array.from(new Set(products.map(p => p.category)));
@@ -122,6 +156,23 @@ export default function AdminProductsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
+                {loading && (
+                  <tr>
+                    <td colSpan={8} className="py-12 text-center text-gray-400">
+                      <div className="flex items-center justify-center gap-2">
+                        <Loader2 size={16} className="animate-spin" />
+                        Loading products…
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                {!loading && filteredProducts.length === 0 && (
+                  <tr>
+                    <td colSpan={8} className="py-12 text-center text-gray-400">
+                      No products found.
+                    </td>
+                  </tr>
+                )}
                 {filteredProducts.map(product => (
                   <tr key={product.id} className="hover:bg-gray-50">
                     <td className="py-3 px-4">
