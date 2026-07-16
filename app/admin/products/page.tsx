@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Plus, Search, CreditCard as Edit, Trash2, Eye, Filter, Loader as Loader2 } from 'lucide-react';
+import { Plus, Search, Pencil as Edit, Trash2, Eye, Loader2, AlertCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import AdminLayout from '../AdminShell';
 import { Button } from '@/components/ui/button';
@@ -16,10 +16,11 @@ interface Product {
   brand: string;
   category: string;
   price: number;
-  originalPrice?: number;
-  stockStatus: string;
-  badge?: string;
+  compare_price?: number;
+  stock: number;
+  active: boolean;
   image: string;
+  created_at?: string;
 }
 
 export default function AdminProductsPage() {
@@ -29,19 +30,26 @@ export default function AdminProductsPage() {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
+        setLoading(true);
+        setError(null);
         const { data, error } = await supabase
           .from('products')
-          .select('id, slug, name, brand, category, price, originalPrice, stockStatus, badge, image');
-        if (!cancelled && !error && data) {
-          setProducts(data as Product[]);
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (cancelled) return;
+        if (error) {
+          setError(error.message);
+        } else {
+          setProducts((data ?? []) as Product[]);
         }
-      } catch {
-        // keep empty list on error
+      } catch (err: any) {
+        if (!cancelled) setError(err?.message ?? 'Failed to load products');
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -49,13 +57,14 @@ export default function AdminProductsPage() {
     return () => { cancelled = true; };
   }, []);
 
-  // Get unique categories and brands
-  const categories = Array.from(new Set(products.map(p => p.category)));
-  const brands = Array.from(new Set(products.map(p => p.brand)));
+  const categories = Array.from(new Set(products.map(p => p.category).filter(Boolean)));
+  const brands = Array.from(new Set(products.map(p => p.brand).filter(Boolean)));
 
   const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.brand.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.toLowerCase();
+    const matchesSearch =
+      (product.name ?? '').toLowerCase().includes(q) ||
+      (product.brand ?? '').toLowerCase().includes(q);
     const matchesCategory = filterCategory === 'all' || product.category === filterCategory;
     const matchesBrand = filterBrand === 'all' || product.brand === filterBrand;
     return matchesSearch && matchesCategory && matchesBrand;
@@ -97,7 +106,7 @@ export default function AdminProductsPage() {
             <Input
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search products..."
+              placeholder="Search by product name or brand..."
               className="pl-10"
             />
           </div>
@@ -123,7 +132,7 @@ export default function AdminProductsPage() {
           </select>
         </div>
 
-        {/* Products Grid */}
+        {/* Products Table */}
         <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
           {/* Bulk Actions */}
           {selectedProducts.length > 0 && (
@@ -141,12 +150,13 @@ export default function AdminProductsPage() {
                   <th className="text-left py-3 px-4">
                     <input
                       type="checkbox"
-                      checked={selectedProducts.length === filteredProducts.length}
+                      checked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
                       onChange={toggleAll}
                       className="rounded"
                     />
                   </th>
-                  <th className="text-left py-3 px-4 font-medium">Product</th>
+                  <th className="text-left py-3 px-4 font-medium">Image</th>
+                  <th className="text-left py-3 px-4 font-medium">Product Name</th>
                   <th className="text-left py-3 px-4 font-medium">Category</th>
                   <th className="text-left py-3 px-4 font-medium">Brand</th>
                   <th className="text-right py-3 px-4 font-medium">Price</th>
@@ -156,9 +166,10 @@ export default function AdminProductsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
+                {/* Loading state */}
                 {loading && (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-gray-400">
+                    <td colSpan={9} className="py-12 text-center text-gray-400">
                       <div className="flex items-center justify-center gap-2">
                         <Loader2 size={16} className="animate-spin" />
                         Loading products…
@@ -166,14 +177,32 @@ export default function AdminProductsPage() {
                     </td>
                   </tr>
                 )}
-                {!loading && filteredProducts.length === 0 && (
+
+                {/* Error state */}
+                {!loading && error && (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-gray-400">
-                      No products found.
+                    <td colSpan={9} className="py-12 text-center">
+                      <div className="flex flex-col items-center gap-2 text-red-500">
+                        <AlertCircle size={20} />
+                        <p className="text-sm font-medium">Failed to load products</p>
+                        <p className="text-xs text-gray-400">{error}</p>
+                      </div>
                     </td>
                   </tr>
                 )}
-                {filteredProducts.map(product => (
+
+                {/* Empty state */}
+                {!loading && !error && filteredProducts.length === 0 && (
+                  <tr>
+                    <td colSpan={9} className="py-12 text-center text-gray-400">
+                      <p className="text-sm">No products found.</p>
+                      <p className="text-xs mt-1">Try adjusting your search or filters.</p>
+                    </td>
+                  </tr>
+                )}
+
+                {/* Product rows */}
+                {!loading && !error && filteredProducts.map(product => (
                   <tr key={product.id} className="hover:bg-gray-50">
                     <td className="py-3 px-4">
                       <input
@@ -184,50 +213,54 @@ export default function AdminProductsPage() {
                       />
                     </td>
                     <td className="py-3 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100">
-                          <Image src={product.image} alt={product.name} fill className="object-cover" />
-                        </div>
-                        <div>
-                          <p className="font-medium line-clamp-1">{product.name}</p>
-                          <p className="text-xs text-gray-500">{product.id}</p>
-                        </div>
+                      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100">
+                        <Image
+                          src={product.image || '/placeholder.png'}
+                          alt={product.name || 'Product'}
+                          fill
+                          className="object-cover"
+                        />
                       </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <p className="font-medium line-clamp-1">{product.name}</p>
+                      <p className="text-xs text-gray-500">{product.id}</p>
                     </td>
                     <td className="py-3 px-4 text-sm">{product.category}</td>
                     <td className="py-3 px-4 text-sm">{product.brand}</td>
                     <td className="py-3 px-4 text-sm text-right">
                       <span className="font-medium">৳{product.price}</span>
-                      {product.originalPrice && (
-                        <span className="text-gray-400 line-through ml-1">৳{product.originalPrice}</span>
+                      {product.compare_price != null && product.compare_price > 0 && (
+                        <span className="text-gray-400 line-through ml-1">৳{product.compare_price}</span>
                       )}
                     </td>
                     <td className="py-3 px-4 text-center">
                       <span className={`inline-flex px-2 py-1 text-xs rounded-full font-medium ${
-                        product.stockStatus === 'in_stock' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                        product.stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                       }`}>
-                        {product.stockStatus === 'in_stock' ? 'In Stock' : 'Out of Stock'}
+                        {product.stock > 0 ? `${product.stock} in stock` : 'Out of Stock'}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        {product.badge === 'New' && <span className="text-xs px-1 bg-blue-100 text-blue-600 rounded">New</span>}
-                        {product.badge === 'Best Seller' && <span className="text-xs px-1 bg-amber-100 text-amber-600 rounded">Hot</span>}
-                        {product.badge === 'Sale' && <span className="text-xs px-1 bg-orange-100 text-orange-600 rounded">Sale</span>}
-                      </div>
+                      <span className={`inline-flex px-2 py-1 text-xs rounded-full font-medium ${
+                        product.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                      }`}>
+                        {product.active ? 'Active' : 'Inactive'}
+                      </span>
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center justify-center gap-1">
                         <Link
                           href={`/product/${product.slug}`}
                           className="p-1.5 hover:bg-gray-100 rounded-lg"
+                          title="View"
                         >
                           <Eye size={16} className="text-gray-500" />
                         </Link>
-                        <button className="p-1.5 hover:bg-gray-100 rounded-lg">
+                        <button className="p-1.5 hover:bg-gray-100 rounded-lg" title="Edit">
                           <Edit size={16} className="text-gray-500" />
                         </button>
-                        <button className="p-1.5 hover:bg-red-50 rounded-lg">
+                        <button className="p-1.5 hover:bg-red-50 rounded-lg" title="Delete">
                           <Trash2 size={16} className="text-red-500" />
                         </button>
                       </div>
