@@ -1,9 +1,41 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Lock, Mail, Zap } from 'lucide-react';
+import { supabase } from '@/lib/supabase/client';
 
 export default function AdminLoginPage() {
+  const router = useRouter();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    setLoading(true);
+    setError('');
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      setError(error.message);
+      return;
+    }
+
+    router.push('/admin');
+    router.refresh();
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#1C1C2E] via-[#33334C] to-[#1F2D4D] flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/10 overflow-hidden">
@@ -12,17 +44,33 @@ export default function AdminLoginPage() {
             <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-[#C4818A] flex items-center justify-center text-white shadow-lg">
               <Lock size={28} />
             </div>
-            <h1 className="text-3xl font-semibold text-gray-900">Admin Login</h1>
-            <p className="text-sm text-gray-500 mt-2">Secure access for store managers and administrators.</p>
+
+            <h1 className="text-3xl font-semibold text-gray-900">
+              Admin Login
+            </h1>
+
+            <p className="text-sm text-gray-500 mt-2">
+              Secure access for store managers and administrators.
+            </p>
           </div>
 
-          <form className="space-y-5">
+          <form onSubmit={handleLogin} className="space-y-5">
             <label className="block">
-              <span className="text-sm font-medium text-gray-700">Email</span>
+              <span className="text-sm font-medium text-gray-700">
+                Email
+              </span>
+
               <div className="mt-2 relative rounded-2xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus-within:border-[#C4818A] focus-within:ring-1 focus-within:ring-[#C4818A]">
-                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Mail
+                  size={16}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                />
+
                 <input
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                   placeholder="admin@example.com"
                   className="w-full pl-9 pr-3 py-2 text-sm text-gray-900 bg-transparent outline-none"
                 />
@@ -30,32 +78,54 @@ export default function AdminLoginPage() {
             </label>
 
             <label className="block">
-              <span className="text-sm font-medium text-gray-700">Password</span>
+              <span className="text-sm font-medium text-gray-700">
+                Password
+              </span>
+
               <div className="mt-2 relative rounded-2xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus-within:border-[#C4818A] focus-within:ring-1 focus-within:ring-[#C4818A]">
-                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Lock
+                  size={16}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                />
+
                 <input
                   type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                   placeholder="••••••••"
                   className="w-full pl-9 pr-3 py-2 text-sm text-gray-900 bg-transparent outline-none"
                 />
               </div>
             </label>
 
+            {error && (
+              <p className="text-sm text-red-600 text-center">
+                {error}
+              </p>
+            )}
+
             <button
-              type="button"
-              className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#C4818A] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#C4818A]/20 hover:bg-[#b06e77] transition"
+              type="submit"
+              disabled={loading}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#C4818A] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#C4818A]/20 hover:bg-[#b06e77] transition disabled:opacity-50"
             >
               <Zap size={16} />
-              Sign in
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
 
           <div className="mt-8 text-center text-sm text-gray-500">
             <p>
-              Access the admin dashboard for managing products, orders, customers and store settings.
+              Access the admin dashboard for managing products, orders,
+              customers and store settings.
             </p>
+
             <p className="mt-4">
-              <Link href="/admin" className="font-semibold text-[#C4818A] hover:text-[#b06e77]">
+              <Link
+                href="/admin"
+                className="font-semibold text-[#C4818A] hover:text-[#b06e77]"
+              >
                 Continue to dashboard
               </Link>
             </p>

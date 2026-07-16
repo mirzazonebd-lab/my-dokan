@@ -82,7 +82,10 @@ export default function AdminLayout({
           <div className="h-16 flex items-center justify-between px-4 border-b border-white/10">
             {sidebarOpen && (
               <span className="font-bold text-xl">
-                <span className="text-[#C4818A]">Skin</span>Verse Admin
+                <div className="flex items-center gap-2">
+  <span className="text-[#C4818A] font-bold">Beauty</span>
+  <span className="font-bold text-white">Dokan BD</span>
+</div>
               </span>
             )}
             <button
