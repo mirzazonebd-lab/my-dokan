@@ -25,9 +25,17 @@ const brandLinks = [
 
 const helpLinks = [
   { label: 'Track Order', href: '/account/orders' },
-  { label: 'Shipping', href: '/shipping' },
-  { label: 'Returns', href: '/returns' },
+  { label: 'Shipping Policy', href: '/legal/shipping-policy' },
+  { label: 'Return & Refund', href: '/legal/return-refund-policy' },
   { label: 'Contact Us', href: '/contact' },
+];
+
+const legalLinks = [
+  { label: 'Privacy Policy', href: '/legal/privacy-policy' },
+  { label: 'Terms & Conditions', href: '/legal/terms-conditions' },
+  { label: 'Return & Refund Policy', href: '/legal/return-refund-policy' },
+  { label: 'Shipping Policy', href: '/legal/shipping-policy' },
+  { label: 'Disclaimer', href: '/legal/disclaimer' },
 ];
 
 export default function Footer() {
@@ -115,13 +123,15 @@ export default function Footer() {
             </ul>
             <div className="flex items-center gap-3 mt-6">
               {[
-                { icon: Facebook, href: '#', label: 'Facebook' },
+                { icon: Facebook, href: 'https://www.facebook.com/beautydokanbd', label: 'Facebook' },
                 { icon: Instagram, href: '#', label: 'Instagram' },
                 { icon: Youtube, href: '#', label: 'YouTube' },
               ].map(({ icon: Icon, href, label }) => (
                 <Link
                   key={label}
                   href={href}
+                  target={href.startsWith('http') ? '_blank' : undefined}
+                  rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
                   aria-label={label}
                   className="w-8 h-8 bg-white/10 hover:bg-[#C4818A] rounded-lg flex items-center justify-center transition-colors"
                 >
@@ -129,6 +139,22 @@ export default function Footer() {
                 </Link>
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* Legal Links */}
+        <div className="mt-10 pt-8 border-t border-white/10">
+          <h3 className="font-semibold text-white text-sm mb-5">Legal</h3>
+          <div className="flex flex-wrap gap-x-6 gap-y-3">
+            {legalLinks.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                className="text-sm text-gray-400 hover:text-[#E8A0AA] transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
         </div>
       </div>
@@ -139,10 +165,10 @@ export default function Footer() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
             <p>© {new Date().getFullYear()} Beauty Dokan BD. All rights reserved.</p>
             <div className="flex items-center gap-6">
-              <Link href="/privacy" className="hover:text-[#E8A0AA] transition-colors">
+              <Link href="/legal/privacy-policy" className="hover:text-[#E8A0AA] transition-colors">
                 Privacy
               </Link>
-              <Link href="/terms" className="hover:text-[#E8A0AA] transition-colors">
+              <Link href="/legal/terms-conditions" className="hover:text-[#E8A0AA] transition-colors">
                 Terms
               </Link>
             </div>
