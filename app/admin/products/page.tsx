@@ -4,13 +4,14 @@ import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Search, CreditCard as Edit, Trash2, Eye, Filter } from 'lucide-react';
-import { products } from '@/lib/data/products';
+import { products as initialProducts } from '@/lib/data/products';
+import type { Product } from '@/lib/data/types';
 import AdminLayout from '../AdminShell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
+ const [products, setProducts] = useState<Product[]>(initialProducts);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
@@ -71,9 +72,8 @@ export default function AdminProductsPage() {
               className="pl-10"
               placeholder="Search by name or brand..."
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search products..."
-              className="pl-10"
+              onChange={(e) => setSearchQuery(e.target.value)}
+             
             />
           </div>
 
