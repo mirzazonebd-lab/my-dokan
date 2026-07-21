@@ -52,7 +52,9 @@ export type Order = {
   total: number;
   coupon_code: string | null;
   payment_method: string;
-  payment_status: 'pending' | 'paid' | 'failed';
+  transaction_id?: string | null;
+  payment_screenshot?: string | null;
+  payment_status: 'pending' | 'paid' | 'failed' | 'Pending Verification' | 'Verified' | 'Rejected';
   shipping_address: Address;
   notes: string | null;
   created_at: string;

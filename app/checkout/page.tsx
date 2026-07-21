@@ -7,27 +7,28 @@ import { useCart } from '@/components/cart/CartStore';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronRight, ChevronLeft, Check, Loader as Loader2, User, Phone, Mail, MapPin, Truck, CreditCard, ShoppingBag, Tag, Sparkles, Package } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Check, Loader as Loader2, User, Phone, Mail, MapPin, Truck, CreditCard, ShoppingBag, Tag, Sparkles, Package, Landmark, Upload } from 'lucide-react';
 import { BANGLADESH_DISTRICTS } from '@/lib/demo-data';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import ClientWrapper from '@/components/ClientWrapper';
+import { toast } from 'sonner';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const ORDERS_KEY = 'beautydokanbd_orders';
 
-const DHAKA_AREAS = [
+const DHAKA_THANAS = [
   'Mirpur', 'Mohammadpur', 'Gulshan', 'Banani', 'Uttara', 'Dhanmondi',
   'Motijheel', 'Old Dhaka', 'Rampura', 'Badda', 'Khilgaon', 'Shyamoli',
   'Azimpur', 'Wari', 'Lalbagh', 'Tejgaon', 'Farmgate', 'Mohakhali',
   'Bashundhara', 'Baridhara', 'Pallabi', 'Turag', 'Demra', 'Jurain',
 ];
 
-const DISTRICT_AREAS: Record<string, string[]> = {
-  Dhaka: DHAKA_AREAS,
+const DISTRICT_THANAS: Record<string, string[]> = {
+  Dhaka: DHAKA_THANAS,
   Gazipur: ['Tongi', 'Joydebpur', 'Kaliakair', 'Sreepur', 'Kapasia'],
   Narayanganj: ['Narayanganj City', 'Siddhirganj', 'Araihazar', 'Bandar', 'Rupganj'],
   Chittagong: ['Agrabad', 'GEC Circle', 'Nasirabad', 'Halishahar', 'Pahartali', 'Patenga', 'Khulshi', 'Chawkbazar'],
@@ -38,7 +39,6 @@ const DISTRICT_AREAS: Record<string, string[]> = {
   Mymensingh: ['Mymensingh City', 'Trishal', 'Bhaluka', 'Muktagacha', 'Fulbaria'],
 };
 
-const INSIDE_DHAKA_DISTRICTS = ['Dhaka', 'Gazipur', 'Narayanganj'];
 const SHIPPING_INSIDE  = 60;
 const SHIPPING_OUTSIDE = 120;
 
@@ -47,7 +47,7 @@ const COUPONS: Record<string, number> = { WELCOME10: 10, SKIN20: 20, BEAUTY15: 1
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Step = 'cart' | 'info' | 'shipping' | 'payment' | 'review';
-type PaymentMethod = 'cod' | 'bkash' | 'nagad';
+type PaymentMethod = 'cod' | 'bkash' | 'nagad' | 'rocket' | 'bank';
 
 interface CustomerInfo {
   fullName: string;
@@ -58,8 +58,13 @@ interface CustomerInfo {
 interface ShippingInfo {
   address: string;
   district: string;
-  area: string;
-  postalCode: string;
+  thana: string;
+}
+
+interface PaymentInfo {
+  transactionId: string;
+  screenshot: string | null;
+  screenshotName: string;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -70,11 +75,11 @@ const STEP_LABELS: Record<Step, string> = {
 };
 
 function calcShipping(district: string): number {
-  return INSIDE_DHAKA_DISTRICTS.includes(district) ? SHIPPING_INSIDE : SHIPPING_OUTSIDE;
+  return district === 'Dhaka' ? SHIPPING_INSIDE : SHIPPING_OUTSIDE;
 }
 
-function getAreas(district: string): string[] {
-  return DISTRICT_AREAS[district] ?? ['City Centre', 'Sadar', 'Upazila Area'];
+function getThanas(district: string): string[] {
+  return DISTRICT_THANAS[district] ?? ['Sadar', `${district} Upazila`];
 }
 
 function genOrderNumber(): string {
@@ -83,8 +88,8 @@ function genOrderNumber(): string {
   return `BD${ts}${rand}`;
 }
 
-function isInsideDhaka(district: string) {
-  return INSIDE_DHAKA_DISTRICTS.includes(district);
+function isDhaka(district: string) {
+  return district === 'Dhaka';
 }
 
 // ─── Step progress bar ────────────────────────────────────────────────────────
@@ -187,14 +192,15 @@ function PaymentOption({ value, selected, onSelect, icon, iconBg, label, descrip
 function OrderSummary({
   items, subtotal, shippingCost, discount, couponCode,
   couponApplied, couponError, onCouponChange, onApplyCoupon,
-  showCoupon,
+  showCoupon, payment,
 }: {
   items: any[]; subtotal: number; shippingCost: number; discount: number;
   couponCode: string; couponApplied: boolean; couponError: string;
   onCouponChange: (v: string) => void; onApplyCoupon: () => void;
-  showCoupon: boolean;
+  showCoupon: boolean; payment: PaymentMethod;
 }) {
   const grandTotal = subtotal + shippingCost - discount;
+  const paymentLabel = payment === 'cod' ? 'Cash on Delivery' : payment === 'bkash' ? 'bKash' : payment === 'nagad' ? 'Nagad' : payment === 'rocket' ? 'Rocket' : 'Bank Transfer';
   return (
     <div className="sticky top-24 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-5">
       <h2 className="text-base font-semibold text-gray-900">Order Summary</h2>
@@ -247,12 +253,10 @@ function OrderSummary({
           <span>Subtotal ({items.reduce((s, i) => s + i.quantity, 0)} items)</span>
           <span>৳{subtotal.toLocaleString()}</span>
         </div>
-        {discount > 0 && (
-          <div className="flex justify-between text-sm text-green-600">
-            <span>Discount</span>
-            <span>−৳{discount.toLocaleString()}</span>
-          </div>
-        )}
+        <div className="flex justify-between text-sm text-green-600">
+          <span>Discount</span>
+          <span>-৳{discount.toLocaleString()}</span>
+        </div>
         <div className="flex justify-between text-sm text-gray-600">
           <span>Delivery</span>
           <span className={shippingCost === 0 ? 'text-green-600 font-medium' : ''}>
@@ -263,15 +267,19 @@ function OrderSummary({
           <span>Grand Total</span>
           <span className="text-[#C4818A]">৳{grandTotal.toLocaleString()}</span>
         </div>
+        <div className="flex justify-between text-sm text-gray-600">
+          <span>Payment Method</span><span>{paymentLabel}</span>
+        </div>
+        <div className="flex justify-between text-sm font-semibold text-gray-900">
+          <span>Remaining Due</span><span>{payment === 'cod' ? `৳${grandTotal.toLocaleString()}` : '৳0'}</span>
+        </div>
       </div>
 
       {shippingCost > 0 && (
         <div className="bg-amber-50 rounded-xl p-3 flex items-start gap-2">
           <Sparkles size={14} className="text-amber-600 mt-0.5 flex-shrink-0" />
           <p className="text-xs text-amber-700">
-            {INSIDE_DHAKA_DISTRICTS.some(d => d === 'Dhaka')
-              ? `Inside Dhaka: ৳${SHIPPING_INSIDE} • Outside Dhaka: ৳${SHIPPING_OUTSIDE}`
-              : 'Delivery charge calculated by location'}
+            {`Dhaka: ৳${SHIPPING_INSIDE} • Other districts: ৳${SHIPPING_OUTSIDE}`}
           </p>
         </div>
       )}
@@ -298,11 +306,13 @@ function CheckoutContent() {
   const [infoErrors, setInfoErrors] = useState<Partial<CustomerInfo>>({});
 
   // Shipping
-  const [ship, setShip]             = useState<ShippingInfo>({ address: '', district: 'Dhaka', area: '', postalCode: '' });
+  const [ship, setShip]             = useState<ShippingInfo>({ address: '', district: 'Dhaka', thana: '' });
   const [shipErrors, setShipErrors] = useState<Partial<ShippingInfo>>({});
 
   // Payment
   const [payment, setPayment]       = useState<PaymentMethod>('cod');
+  const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>({ transactionId: '', screenshot: null, screenshotName: '' });
+  const [note, setNote] = useState('');
 
   // Coupon
   const [couponCode, setCouponCode]       = useState('');
@@ -339,6 +349,8 @@ function CheckoutContent() {
   };
 
   // Run URL hydration once when mounted or when searchParams change.
+  // URL hydration is deliberately run only when its route inputs change.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
@@ -354,6 +366,8 @@ function CheckoutContent() {
     else setUrlHydrationInProgress(false);
 
     return () => { cancelled = true; };
+  // tryHydrateFromUrl intentionally remains local to avoid re-triggering the URL hydration loop.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted, searchParams, addItem]);
   useEffect(() => {
     // Wait for cart provider and URL hydration attempt to finish before redirecting away from checkout
@@ -362,7 +376,7 @@ function CheckoutContent() {
 
   const shippingCost = ship.district ? calcShipping(ship.district) : SHIPPING_INSIDE;
   const grandTotal   = subtotal + shippingCost - discount;
-  const areas        = getAreas(ship.district);
+  const thanas       = getThanas(ship.district);
 
   // ── Coupon ──
   const applyCoupon = useCallback(() => {
@@ -390,8 +404,8 @@ function CheckoutContent() {
     const e: Partial<CustomerInfo> = {};
     if (!info.fullName.trim()) e.fullName = 'Full name is required';
     if (!info.mobile.trim()) e.mobile = 'Mobile number is required';
-    else if (!/^(?:\+?880|0)1[3-9]\d{8}$/.test(info.mobile.replace(/[\s-]/g, '')))
-      e.mobile = 'Enter a valid Bangladeshi mobile number';
+    else if (!/^01\d{9}$/.test(info.mobile))
+      e.mobile = 'Enter an 11-digit Bangladesh number (01XXXXXXXXX)';
     if (info.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(info.email))
       e.email = 'Enter a valid email address';
     setInfoErrors(e);
@@ -401,9 +415,30 @@ function CheckoutContent() {
   const validateShipping = (): boolean => {
     const e: Partial<ShippingInfo> = {};
     if (!ship.address.trim()) e.address = 'Delivery address is required';
-    if (!ship.area) e.area = 'Please select an area';
+    if (!ship.district) e.district = 'Please select a district';
+    if (!ship.thana) e.thana = 'Please select a Thana / Upazila';
     setShipErrors(e);
     return Object.keys(e).length === 0;
+  };
+
+  const requiresAdvanceProof = payment !== 'cod';
+  const validatePayment = (): boolean => {
+    if (!requiresAdvanceProof) return true;
+    if (!paymentInfo.transactionId.trim()) {
+      toast.error('Transaction ID is required for advance payment.');
+      return false;
+    }
+    return true;
+  };
+
+  const handleScreenshot = (file?: File) => {
+    if (!file) return;
+    const allowed = ['image/jpeg', 'image/png', 'application/pdf'];
+    if (!allowed.includes(file.type)) { toast.error('Upload a JPG, JPEG, PNG, or PDF file.'); return; }
+    if (file.size > 4 * 1024 * 1024) { toast.error('Screenshot must be 4 MB or smaller.'); return; }
+    const reader = new FileReader();
+    reader.onload = () => setPaymentInfo(p => ({ ...p, screenshot: String(reader.result), screenshotName: file.name }));
+    reader.readAsDataURL(file);
   };
 
   // ── Navigation ──
@@ -411,7 +446,7 @@ function CheckoutContent() {
     if (step === 'cart')     { setStep('info'); window.scrollTo(0, 0); }
     if (step === 'info')     { if (validateInfo())     { setStep('shipping'); window.scrollTo(0, 0); } }
     if (step === 'shipping') { if (validateShipping()) { setStep('payment');  window.scrollTo(0, 0); } }
-    if (step === 'payment')  { setStep('review'); window.scrollTo(0, 0); }
+    if (step === 'payment')  { if (validatePayment()) { setStep('review'); window.scrollTo(0, 0); } }
   };
 
   const goBack = () => {
@@ -421,6 +456,7 @@ function CheckoutContent() {
 
   // ── Place order ──
   const placeOrder = async () => {
+    if (!validateInfo() || !validateShipping() || !validatePayment()) return;
     setLoading(true);
     try {
       const orderNumber = genOrderNumber();
@@ -434,16 +470,19 @@ function CheckoutContent() {
         total: grandTotal,
         coupon_code: couponApplied ? couponCode : null,
         payment_method: payment,
-        payment_status: 'pending',
+        transaction_id: paymentInfo.transactionId || null,
+        payment_screenshot: paymentInfo.screenshot,
+        payment_status: 'Pending Verification',
         shipping_address: {
           name: info.fullName,
           phone: info.mobile,
           email: info.email || null,
           address: ship.address,
-          area: ship.area,
+          city: ship.thana,
           district: ship.district,
-          postal_code: ship.postalCode || null,
-          zone: isInsideDhaka(ship.district) ? 'inside_dhaka' : 'outside_dhaka',
+          thana: ship.thana,
+          postal_code: null,
+          zone: isDhaka(ship.district) ? 'dhaka' : 'outside_dhaka',
         },
         items: items.map(item => ({
           id: `item-${Date.now()}-${item.product_id}`,
@@ -455,7 +494,8 @@ function CheckoutContent() {
           quantity: item.quantity,
           subtotal: item.product.price * item.quantity,
         })),
-        estimated_delivery: isInsideDhaka(ship.district)
+        notes: note || null,
+        estimated_delivery: isDhaka(ship.district)
           ? '2–3 business days'
           : '4–7 business days',
         created_at: new Date().toISOString(),
@@ -465,11 +505,14 @@ function CheckoutContent() {
       const orders   = existing ? JSON.parse(existing) : [];
       orders.unshift(order);
       localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+      localStorage.setItem('beautydokanbd_admin_orders', JSON.stringify(orders));
 
       await clearCart();
+      toast.success('Order placed successfully.');
       router.push(`/checkout/success?order=${orderNumber}`);
     } catch (err) {
       console.error(err);
+      toast.error('Unable to place your order. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -605,13 +648,13 @@ function CheckoutContent() {
                     <ZoneChip
                       label="Inside Dhaka"
                       sub={`৳${SHIPPING_INSIDE} delivery`}
-                      active={isInsideDhaka(ship.district)}
+                      active={isDhaka(ship.district)}
                       color="blue"
                     />
                     <ZoneChip
                       label="Outside Dhaka"
                       sub={`৳${SHIPPING_OUTSIDE} delivery`}
-                      active={!isInsideDhaka(ship.district)}
+                      active={!isDhaka(ship.district)}
                       color="orange"
                     />
                   </div>
@@ -628,52 +671,39 @@ function CheckoutContent() {
 
                     <div className="grid sm:grid-cols-2 gap-4">
                       <Field label="District" required>
-                        <select
+                        <Input
                           value={ship.district}
-                          onChange={e => setShip(p => ({ ...p, district: e.target.value, area: '' }))}
-                          className="w-full h-10 px-3 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                        >
-                          {BANGLADESH_DISTRICTS.map(d => (
-                            <option key={d} value={d}>{d}</option>
-                          ))}
-                        </select>
+                          list="district-options"
+                          placeholder="Search district"
+                          onChange={e => setShip(p => ({ ...p, district: e.target.value, thana: '' }))}
+                        />
+                        <datalist id="district-options">{BANGLADESH_DISTRICTS.map(d => <option key={d} value={d} />)}</datalist>
                       </Field>
 
-                      <Field label="Area" required error={shipErrors.area}>
-                        <select
-                          value={ship.area}
-                          onChange={e => setShip(p => ({ ...p, area: e.target.value }))}
-                          className={`w-full h-10 px-3 rounded-lg border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring ${
-                            shipErrors.area ? 'border-red-400' : 'border-input'
-                          }`}
-                        >
-                          <option value="">Select area</option>
-                          {areas.map(a => <option key={a} value={a}>{a}</option>)}
-                        </select>
+                      <Field label="Thana / Upazila" required error={shipErrors.thana}>
+                        <Input
+                          value={ship.thana}
+                          list="thana-options"
+                          onChange={e => setShip(p => ({ ...p, thana: e.target.value }))}
+                          placeholder="Search Thana / Upazila"
+                          className={shipErrors.thana ? 'border-red-400' : ''}
+                        />
+                        <datalist id="thana-options">{thanas.map(thana => <option key={thana} value={thana} />)}</datalist>
                       </Field>
                     </div>
 
-                    <Field label="Postal Code">
-                      <Input
-                        value={ship.postalCode}
-                        onChange={e => setShip(p => ({ ...p, postalCode: e.target.value }))}
-                        placeholder="e.g. 1216"
-                        className="w-full sm:w-40"
-                      />
-                    </Field>
-
                     {/* Delivery charge display */}
                     <div className={`rounded-xl p-4 flex items-center gap-3 ${
-                      isInsideDhaka(ship.district) ? 'bg-blue-50 border border-blue-100' : 'bg-orange-50 border border-orange-100'
+                      isDhaka(ship.district) ? 'bg-blue-50 border border-blue-100' : 'bg-orange-50 border border-orange-100'
                     }`}>
-                      <Truck size={18} className={isInsideDhaka(ship.district) ? 'text-blue-600' : 'text-orange-600'} />
+                      <Truck size={18} className={isDhaka(ship.district) ? 'text-blue-600' : 'text-orange-600'} />
                       <div>
                         <p className="text-sm font-semibold text-gray-900">
-                          {isInsideDhaka(ship.district) ? 'Inside Dhaka' : 'Outside Dhaka'} Delivery
+                          {isDhaka(ship.district) ? 'Dhaka' : 'Outside Dhaka'} Delivery
                         </p>
                         <p className="text-xs text-gray-500">
                           Charge: <strong>৳{shippingCost}</strong> •{' '}
-                          Estimated: <strong>{isInsideDhaka(ship.district) ? '2–3 business days' : '4–7 business days'}</strong>
+                          Estimated: <strong>{isDhaka(ship.district) ? '2–3 business days' : '4–7 business days'}</strong>
                         </p>
                       </div>
                     </div>
@@ -707,6 +737,8 @@ function CheckoutContent() {
                       label="Nagad (Manual)"
                       description="Send payment to our Nagad number, then confirm"
                     />
+                    <PaymentOption value="rocket" selected={payment} onSelect={setPayment} icon={<span className="font-extrabold text-sm text-violet-700">Rocket</span>} iconBg="bg-violet-50" label="Rocket" description="Pay by Rocket and submit your transaction ID" />
+                    <PaymentOption value="bank" selected={payment} onSelect={setPayment} icon={<Landmark size={20} className="text-slate-600" />} iconBg="bg-slate-100" label="Bank Transfer" description="Transfer to our bank account and submit proof" />
                   </div>
 
                   {/* Manual payment instructions */}
@@ -727,6 +759,14 @@ function CheckoutContent() {
                         <li>Note the transaction ID after payment</li>
                         <li>Your order will be confirmed once payment is verified</li>
                       </ol>
+                    </div>
+                  )}
+
+                  {requiresAdvanceProof && (
+                    <div className="rounded-xl p-4 mt-3 bg-rose-50 border border-rose-100">
+                      <p className="text-sm font-semibold text-gray-900 mb-3">Advance Payment Details</p>
+                      {payment === 'bank' ? <div className="text-xs text-gray-700 space-y-1 mb-4"><p><strong>Bank Name:</strong> Beauty Dokan BD Bank</p><p><strong>Account Name:</strong> Beauty Dokan BD</p><p><strong>Account Number:</strong> 1234567890</p><p><strong>Routing Number:</strong> 123456789</p></div> : <p className="text-xs text-gray-700 mb-4"><strong>Merchant Number:</strong> 01712-012737 ({payment === 'bkash' ? 'bKash' : payment === 'nagad' ? 'Nagad' : 'Rocket'})</p>}
+                      <div className="grid sm:grid-cols-2 gap-3"><Field label="Transaction ID" required><Input value={paymentInfo.transactionId} onChange={e => setPaymentInfo(p => ({ ...p, transactionId: e.target.value }))} placeholder="Enter transaction ID" /></Field><Field label="Payment Screenshot"><label className="flex h-10 items-center gap-2 rounded-lg border border-dashed border-gray-300 px-3 cursor-pointer hover:border-[#C4818A] transition-colors text-xs text-gray-600"><Upload size={15} /> {paymentInfo.screenshotName || 'Upload JPG, PNG or PDF'}<input type="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" className="sr-only" onChange={e => handleScreenshot(e.target.files?.[0])} /></label></Field></div>
                     </div>
                   )}
 
@@ -754,9 +794,9 @@ function CheckoutContent() {
                     onEdit={() => setStep('shipping')}
                   >
                     <p className="text-sm text-gray-700">{ship.address}</p>
-                    <p className="text-sm text-gray-600">{ship.area}, {ship.district}{ship.postalCode ? ` – ${ship.postalCode}` : ''}</p>
+                    <p className="text-sm text-gray-600">{ship.thana}, {ship.district}</p>
                     <p className="text-xs text-gray-400 mt-1">
-                      {isInsideDhaka(ship.district) ? '🚚 Inside Dhaka • 2–3 business days' : '🚚 Outside Dhaka • 4–7 business days'}
+                      {isDhaka(ship.district) ? '🚚 Dhaka • 2–3 business days' : '🚚 Outside Dhaka • 4–7 business days'}
                     </p>
                   </ReviewBlock>
 
@@ -766,9 +806,14 @@ function CheckoutContent() {
                     onEdit={() => setStep('payment')}
                   >
                     <p className="font-medium text-gray-900">
-                      {payment === 'cod' ? 'Cash on Delivery' : payment === 'bkash' ? 'bKash (Manual)' : 'Nagad (Manual)'}
+                      {payment === 'cod' ? 'Cash on Delivery' : payment === 'bkash' ? 'bKash' : payment === 'nagad' ? 'Nagad' : payment === 'rocket' ? 'Rocket' : 'Bank Transfer'}
                     </p>
+                    {paymentInfo.transactionId && <p className="text-xs text-gray-500 mt-1">Transaction ID: {paymentInfo.transactionId}</p>}
                   </ReviewBlock>
+
+                  <Card icon={<Package size={15} className="text-[#C4818A]" />} title="Order Note">
+                    <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Special delivery instructions..." className="min-h-24 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+                  </Card>
 
                   {/* Items in review */}
                   <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
@@ -808,7 +853,7 @@ function CheckoutContent() {
                         </div>
                       )}
                       <div className="flex justify-between text-gray-600">
-                        <span>Delivery ({isInsideDhaka(ship.district) ? 'Inside Dhaka' : 'Outside Dhaka'})</span>
+                        <span>Delivery ({isDhaka(ship.district) ? 'Dhaka' : 'Outside Dhaka'})</span>
                         <span>৳{shippingCost}</span>
                       </div>
                       <div className="flex justify-between text-base font-bold pt-2 border-t border-gray-100">
@@ -839,7 +884,7 @@ function CheckoutContent() {
             </div>
 
             {/* ── Right / summary column ── */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 max-lg:sticky max-lg:bottom-0 max-lg:z-20 max-lg:pb-2">
               <OrderSummary
                 items={items}
                 subtotal={subtotal}
@@ -851,6 +896,7 @@ function CheckoutContent() {
                 onCouponChange={handleCouponChange}
                 onApplyCoupon={applyCoupon}
                 showCoupon={step !== 'cart'}
+                payment={payment}
               />
             </div>
           </div>
