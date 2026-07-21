@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { MessageCircle, Phone } from 'lucide-react';
 
 export default function WhatsAppFloat() {
-  const phoneNumber = '8801712012737';
+  const phoneNumber = '8801712012737';//'8801797502155';
   const message = encodeURIComponent('Hi! I have a question about Beauty Dokan BD products.');
 
   return (

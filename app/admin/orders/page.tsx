@@ -30,6 +30,8 @@ const statusColors: Record<string, string> = {
 };
 
 const ORDERS_STORAGE_KEY = 'beautydokanbd_admin_orders';
+const CHECKOUT_ORDERS_KEY = 'beautydokanbd_orders';
+const paymentStatusOptions = ['Pending Verification', 'Verified', 'Rejected'] as const;
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<OrderWithItems[]>([]);
@@ -45,7 +47,7 @@ export default function AdminOrdersPage() {
 
   const fetchOrders = async () => {
     // Load from localStorage or use demo data
-    const storedOrders = localStorage.getItem(ORDERS_STORAGE_KEY);
+    const storedOrders = localStorage.getItem(CHECKOUT_ORDERS_KEY) || localStorage.getItem(ORDERS_STORAGE_KEY);
     if (storedOrders) {
       const parsed = JSON.parse(storedOrders);
       setOrders(parsed);
@@ -69,6 +71,14 @@ export default function AdminOrdersPage() {
     localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(updatedOrders));
     setSelectedOrder(prev => prev ? { ...prev, status } : null);
     setDialogOpen(false);
+  };
+
+  const updatePaymentStatus = (orderId: string, payment_status: typeof paymentStatusOptions[number]) => {
+    const updatedOrders = orders.map(o => o.id === orderId ? { ...o, payment_status } : o);
+    setOrders(updatedOrders);
+    localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(updatedOrders));
+    localStorage.setItem(CHECKOUT_ORDERS_KEY, JSON.stringify(updatedOrders));
+    setSelectedOrder(prev => prev ? { ...prev, payment_status } : null);
   };
 
   const filteredOrders = orders.filter(order => {
@@ -139,6 +149,7 @@ export default function AdminOrdersPage() {
                     <th className="text-left py-3 px-4 font-medium">Customer</th>
                     <th className="text-left py-3 px-4 font-medium">Items</th>
                     <th className="text-left py-3 px-4 font-medium">Payment</th>
+                    <th className="text-left py-3 px-4 font-medium">Verification</th>
                     <th className="text-left py-3 px-4 font-medium">Status</th>
                     <th className="text-right py-3 px-4 font-medium">Total</th>
                     <th className="text-center py-3 px-4 font-medium">Actions</th>
@@ -161,6 +172,7 @@ export default function AdminOrdersPage() {
                       <td className="py-3 px-4 text-sm capitalize">
                         {order.payment_method === 'cod' ? 'Cash on Delivery' : order.payment_method}
                       </td>
+                      <td className="py-3 px-4 text-xs font-medium text-gray-600">{order.payment_status}</td>
                       <td className="py-3 px-4">
                         <span className={`inline-flex px-2 py-1 text-xs rounded-full font-medium ${statusColors[order.status] || 'bg-gray-100 text-gray-600'}`}>
                           {order.status}
@@ -226,7 +238,12 @@ export default function AdminOrdersPage() {
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-400 uppercase mb-2">Payment</p>
                   <p className="font-medium capitalize">{selectedOrder.payment_method === 'cod' ? 'Cash on Delivery' : selectedOrder.payment_method}</p>
-                  <p className="text-sm text-gray-500">Status: {selectedOrder.payment_status}</p>
+                  <p className="text-sm text-gray-500">Transaction ID: {selectedOrder.transaction_id || 'Not provided'}</p>
+                  <label className="mt-3 block text-xs font-medium text-gray-500">Payment Status</label>
+                  <select value={selectedOrder.payment_status} onChange={e => updatePaymentStatus(selectedOrder.id, e.target.value as typeof paymentStatusOptions[number])} className="mt-1 h-9 w-full rounded-lg border border-gray-200 px-2 text-sm">
+                    {paymentStatusOptions.map(status => <option key={status} value={status}>{status}</option>)}
+                  </select>
+                  {selectedOrder.payment_screenshot && <a href={selectedOrder.payment_screenshot} target="_blank" rel="noreferrer" className="mt-3 inline-block text-sm text-[#C4818A] hover:underline">View payment screenshot</a>}
                   <p className="text-2xl font-bold mt-2">৳{selectedOrder.total.toLocaleString()}</p>
                 </div>
               </div>
