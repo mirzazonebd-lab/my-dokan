@@ -16,17 +16,18 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: 'Beauty Dokan BD – Premium Beauty & Skincare',
+  metadataBase: new URL('https://www.beautydokan.com'),
+  title: 'Beauty Dokan BD | All Premium Beauty & Skincare products',
   description:
-    "Your Trusted Destination for Premium Beauty Products. Discover authentic global skincare, makeup, hair care, body care and men's grooming—all in one place.",
+    "Your Trusted Bangladeshi Destination for Premium Beauty Products. Discover authentic global beauty & skincare, makeup, hair care, body care, women clothes, Bags, women personal items and men's grooming—all in one place.",
   icons: {
     icon: [{ url: '/logo65 copy.png', type: 'image/png', sizes: '65x65' }],
     shortcut: '/logo65 copy.png',
     apple: '/logo65 copy.png',
   },
   openGraph: {
-    title: 'Beauty Dokan BD – Premium Beauty & Skincare',
-    description: 'Your Trusted Destination for Premium Beauty Products.',
+    title: 'Beauty Dokan BD | All Premium Beauty & Skincare products',
+    description: "Your Trusted Bangladeshi Destination for Premium Beauty Products.",
     siteName: 'Beauty Dokan BD',
     images: [{ url: '/logo65 copy.png' }],
   },
