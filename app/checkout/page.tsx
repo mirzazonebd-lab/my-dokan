@@ -677,7 +677,7 @@ function CheckoutContent() {
                           placeholder="Search district"
                           onChange={e => setShip(p => ({ ...p, district: e.target.value, thana: '' }))}
                         />
-                        <datalist id="district-options">{BANGLADESH_DISTRICTS.map(d => <option key={d} value={d} />)}</datalist>
+                        <datalist id="district-options">{BANGLADESH_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}</datalist>
                       </Field>
 
                       <Field label="Thana / Upazila" required error={shipErrors.thana}>
@@ -688,7 +688,7 @@ function CheckoutContent() {
                           placeholder="Search Thana / Upazila"
                           className={shipErrors.thana ? 'border-red-400' : ''}
                         />
-                        <datalist id="thana-options">{thanas.map(thana => <option key={thana} value={thana} />)}</datalist>
+                        <datalist id="thana-options">{thanas.map(thana => <option key={thana} value={thana}>{thana}</option>)}</datalist>
                       </Field>
                     </div>
 
