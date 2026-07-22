@@ -12,11 +12,19 @@ import {
   PackageSearch,
   Loader2,
 } from 'lucide-react';
-
-import { supabase } from '@/lib/supabase/client';
+import { products as initialProducts } from '@/lib/data/products';
 import AdminLayout from '../AdminShell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 type Product = {
   id: string;
@@ -40,28 +48,32 @@ export default function AdminProductsPage() {
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterBrand, setFilterBrand] = useState('all');
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
+
+  const defaultForm = {
+    name: '',
+    price: '',
+    stock: '',
+    description: '',
+    category: '',
+    brand: '',
+    image: '',
+  };
+  const [formData, setFormData] = useState(defaultForm);
+
+  // When sheet closes, clear editing state
+  useEffect(() => {
+    if (!isSheetOpen) {
+      setEditingProduct(null);
+      setFormData(defaultForm);
+    }
+  }, [isSheetOpen]);
 
   useEffect(() => {
-    let active = true;
-    (async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (active) {
-        if (error) {
-          console.error('Failed to load products:', error.message);
-          setProducts([]);
-        } else {
-          setProducts(data ?? []);
-        }
-        setLoading(false);
-      }
-    })();
-    return () => {
-      active = false;
-    };
+    setProducts(initialProducts as any[]);
+    setLoading(false);
   }, []);
 
   const categories = useMemo(
@@ -110,6 +122,85 @@ export default function AdminProductsPage() {
     }
   };
 
+  const handleSaveProduct = async () => {
+    setIsSubmitting(true);
+
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    if (editingProduct) {
+      // Update existing
+      const updatedProducts = products.map(p => {
+        if (p.id === editingProduct.id) {
+          return {
+            ...p,
+            name: formData.name,
+            slug: formData.name.toLowerCase().replace(/[\s_]+/g, '-').replace(/[^\w-]+/g, ''),
+            price: Number(formData.price),
+            stock: Number(formData.stock),
+            description: formData.description,
+            category: formData.category || null,
+            brand: formData.brand || null,
+            image: formData.image || '/placeholder.png',
+          };
+        }
+        return p;
+      });
+      setProducts(updatedProducts);
+    } else {
+      // Insert new
+      const newProduct = {
+        id: Math.random().toString(36).substr(2, 9),
+        name: formData.name,
+        slug: formData.name.toLowerCase().replace(/[\s_]+/g, '-').replace(/[^\w-]+/g, ''),
+        price: Number(formData.price),
+        stock: Number(formData.stock),
+        description: formData.description,
+        category: formData.category || null,
+        brand: formData.brand || null,
+        image: formData.image || '/placeholder.png',
+        active: true,
+        featured: false,
+      };
+      setProducts([newProduct as any, ...products]);
+    }
+
+    setIsSheetOpen(false);
+    setIsSubmitting(false);
+  };
+
+  const handleEditClick = (product: any) => {
+    setEditingProduct(product);
+    setFormData({
+      name: product.name,
+      price: product.price.toString(),
+      stock: product.stock.toString(),
+      description: product.description || '',
+      category: product.category || '',
+      brand: product.brand || '',
+      image: product.image || '',
+    });
+    setIsSheetOpen(true);
+  };
+
+  const handleDeleteProduct = (id: string) => {
+    if (confirm('Are you sure you want to delete this product?')) {
+      setProducts(products.filter(p => p.id !== id));
+      setSelectedProducts(selectedProducts.filter(selId => selId !== id));
+    }
+  };
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setFormData(prev => ({ ...prev, image: event.target?.result as string }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <AdminLayout activeTab="products">
       <div className="space-y-6">
@@ -121,10 +212,113 @@ export default function AdminProductsPage() {
               {loading ? 'Loading...' : `${filteredProducts.length} products`}
             </p>
           </div>
-          <Button className="bg-[#C4818A] hover:bg-[#B06E77]">
-            <Plus size={16} className="mr-2" />
-            Add Product
-          </Button>
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <SheetTrigger asChild>
+              <Button className="bg-[#C4818A] hover:bg-[#B06E77]">
+                <Plus size={16} className="mr-2" />
+                Add Product
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</SheetTitle>
+                <SheetDescription>
+                  {editingProduct
+                    ? 'Update the details below to edit this product.'
+                    : 'Fill in the details below to add a new product to your catalog.'}
+                </SheetDescription>
+              </SheetHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="photo">Product Photo</Label>
+                  <Input id="photo" type="file" accept="image/*" onChange={handlePhotoUpload} />
+                  <div className="text-xs text-gray-500 text-center my-1">OR</div>
+                  <Input
+                    placeholder="Paste image URL here"
+                    value={formData.image}
+                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                  />
+                  {formData.image && (
+                    <div className="mt-2 w-full h-32 relative bg-gray-100 rounded overflow-hidden">
+                      <Image src={formData.image} alt="Preview" fill className="object-cover" />
+                    </div>
+                  )}
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    placeholder="Product name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="price">Price (৳)</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      placeholder="Enter price"
+                      value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="stock">Initial Stock</Label>
+                    <Input
+                      id="stock"
+                      type="number"
+                      placeholder="Stock quantity"
+                      value={formData.stock}
+                      onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="brand">Brand</Label>
+                    <Input
+                      id="brand"
+                      placeholder="Brand"
+                      value={formData.brand}
+                      onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="category">Category</Label>
+                    <Input
+                      id="category"
+                      placeholder="Category"
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="description">Description</Label>
+                  <textarea
+                    id="description"
+                    className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="Write a short description..."
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  />
+                </div>
+                <Button
+                  onClick={handleSaveProduct}
+                  disabled={isSubmitting || !formData.name || !formData.price}
+                  className="mt-4 bg-[#C4818A] hover:bg-[#B06E77]"
+                >
+                  {isSubmitting ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</>
+                  ) : (
+                    'Save Product'
+                  )}
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
 
         {/* Filters */}
@@ -269,11 +463,10 @@ export default function AdminProductsPage() {
 
                       <td className="px-4 py-3 text-center">
                         <span
-                          className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            product.stock > 0
-                              ? 'bg-green-50 text-green-700'
-                              : 'bg-red-50 text-red-700'
-                          }`}
+                          className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${product.stock > 0
+                            ? 'bg-green-50 text-green-700'
+                            : 'bg-red-50 text-red-700'
+                            }`}
                         >
                           {product.stock}
                         </span>

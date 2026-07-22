@@ -6,9 +6,37 @@ import { Plus, CreditCard as Edit, Trash2, Globe, Sparkles } from 'lucide-react'
 import { brands as brandsData } from '@/lib/data/brands';
 import AdminLayout from '../AdminShell';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 export default function AdminBrandsPage() {
-  const [brands] = useState(brandsData);
+  const [brands, setBrands] = useState(brandsData);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [formData, setFormData] = useState({ name: '', country: '', description: '' });
+
+  const handleCreateBrand = () => {
+    const newBrand = {
+      id: Math.random().toString(36).substr(2, 9),
+      name: formData.name,
+      logo: '/placeholder.png', // Default placeholder
+      country: formData.country,
+      description: formData.description,
+      isKorean: formData.country.toLowerCase().includes('korea'),
+      featured: false,
+      productCount: 0,
+    };
+    setBrands([newBrand as any, ...brands]);
+    setIsSheetOpen(false);
+    setFormData({ name: '', country: '', description: '' });
+  };
 
   const koreanBrands = brands.filter(b => b.isKorean);
   const internationalBrands = brands.filter(b => !b.isKorean);
@@ -21,10 +49,58 @@ export default function AdminBrandsPage() {
             <h1 className="text-2xl font-bold text-gray-900">Brands</h1>
             <p className="text-gray-500">{brands.length} brands</p>
           </div>
-          <Button className="bg-[#C4818A] hover:bg-[#B06E77]">
-            <Plus size={16} className="mr-1" />
-            Add Brand
-          </Button>
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <SheetTrigger asChild>
+              <Button className="bg-[#C4818A] hover:bg-[#B06E77]">
+                <Plus size={16} className="mr-1" />
+                Add Brand
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Add Brand</SheetTitle>
+                <SheetDescription>
+                  Create a new brand.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="brand-name">Brand Name</Label>
+                  <Input
+                    id="brand-name"
+                    placeholder="e.g. COSRX"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="country">Country</Label>
+                  <Input
+                    id="country"
+                    placeholder="e.g. South Korea"
+                    value={formData.country}
+                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Input
+                    id="description"
+                    placeholder="Brief description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  />
+                </div>
+                <Button
+                  onClick={handleCreateBrand}
+                  className="mt-4 bg-[#C4818A] hover:bg-[#B06E77]"
+                  disabled={!formData.name}
+                >
+                  Create Brand
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
 
         {/* Korean Brands */}

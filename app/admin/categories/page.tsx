@@ -8,6 +8,15 @@ import { products } from '@/lib/data/products';
 import AdminLayout from '../AdminShell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 export default function AdminCategoriesPage() {
   const [categories] = useState(categoriesData);
@@ -24,10 +33,29 @@ export default function AdminCategoriesPage() {
             <h1 className="text-2xl font-bold text-gray-900">Categories</h1>
             <p className="text-gray-500">{categories.length} categories</p>
           </div>
-          <Button className="bg-[#C4818A] hover:bg-[#B06E77]">
-            <Plus size={16} className="mr-1" />
-            Add Category
-          </Button>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button className="bg-[#C4818A] hover:bg-[#B06E77]">
+                <Plus size={16} className="mr-1" />
+                Add Category
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Add Category</SheetTitle>
+                <SheetDescription>
+                  Create a new product category.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="cat-name">Category Name</Label>
+                  <Input id="cat-name" placeholder="e.g. Skin Care" />
+                </div>
+                <Button className="mt-4 bg-[#C4818A] hover:bg-[#B06E77]">Create Category</Button>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">

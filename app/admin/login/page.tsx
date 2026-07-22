@@ -4,10 +4,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Lock, Mail, Zap } from 'lucide-react';
-import { supabase } from '@/lib/supabase/client';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const { signIn } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,20 +21,22 @@ export default function AdminLoginPage() {
     setLoading(true);
     setError('');
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    // Local admin verification since database isn't fully configured
+    if (email === 'admin@example.com' && password === 'admin123') {
+      const { error } = await signIn(email, password);
 
-    setLoading(false);
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+        return;
+      }
 
-    if (error) {
-      setError(error.message);
-      return;
+      router.push('/admin');
+      router.refresh();
+    } else {
+      setError('Invalid email or password.');
+      setLoading(false);
     }
-
-    router.push('/admin');
-    router.refresh();
   };
 
   return (
@@ -119,15 +122,6 @@ export default function AdminLoginPage() {
             <p>
               Access the admin dashboard for managing products, orders,
               customers and store settings.
-            </p>
-
-            <p className="mt-4">
-              <Link
-                href="/admin"
-                className="font-semibold text-[#C4818A] hover:text-[#b06e77]"
-              >
-                Continue to dashboard
-              </Link>
             </p>
           </div>
         </div>

@@ -5,6 +5,15 @@ import { Plus, CreditCard as Edit, Trash2, Ticket, Percent, Calendar, Users } fr
 import AdminLayout from '../AdminShell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 interface Coupon {
   id: string;
@@ -26,7 +35,31 @@ const mockCoupons: Coupon[] = [
 ];
 
 export default function AdminCouponsPage() {
-  const [coupons] = useState(mockCoupons);
+  const [coupons, setCoupons] = useState(mockCoupons);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    code: '',
+    discount: '',
+    discountType: 'percentage',
+    minPurchase: '',
+  });
+
+  const handleCreateCoupon = () => {
+    const newCoupon: Coupon = {
+      id: Math.random().toString(36).substr(2, 9),
+      code: formData.code.toUpperCase(),
+      discount: Number(formData.discount),
+      discountType: formData.discountType as any,
+      minPurchase: Number(formData.minPurchase),
+      usageLimit: 100,
+      usedCount: 0,
+      expiresAt: '2026-12-31',
+      status: 'active',
+    };
+    setCoupons([newCoupon, ...coupons]);
+    setIsSheetOpen(false);
+    setFormData({ code: '', discount: '', discountType: 'percentage', minPurchase: '' });
+  };
 
   return (
     <AdminLayout activeTab="coupons">
@@ -36,10 +69,54 @@ export default function AdminCouponsPage() {
             <h1 className="text-2xl font-bold text-gray-900">Coupons</h1>
             <p className="text-gray-500">{coupons.length} coupons</p>
           </div>
-          <Button className="bg-[#C4818A] hover:bg-[#B06E77]">
-            <Plus size={16} className="mr-1" />
-            Add Coupon
-          </Button>
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <SheetTrigger asChild>
+              <Button className="bg-[#C4818A] hover:bg-[#B06E77]">
+                <Plus size={16} className="mr-1" />
+                Add Coupon
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Add Coupon</SheetTitle>
+                <SheetDescription>
+                  Create a new discount coupon.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="coupon-code">Coupon Code</Label>
+                  <Input
+                    id="coupon-code"
+                    placeholder="e.g. SUMMER20"
+                    value={formData.code}
+                    onChange={e => setFormData({ ...formData, code: e.target.value })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="discount">Discount Value</Label>
+                  <Input
+                    id="discount"
+                    type="number"
+                    placeholder="Value"
+                    value={formData.discount}
+                    onChange={e => setFormData({ ...formData, discount: e.target.value })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="min-purchase">Minimum Purchase (৳)</Label>
+                  <Input
+                    id="min-purchase"
+                    type="number"
+                    placeholder="Enter amount"
+                    value={formData.minPurchase}
+                    onChange={e => setFormData({ ...formData, minPurchase: e.target.value })}
+                  />
+                </div>
+                <Button onClick={handleCreateCoupon} disabled={!formData.code || !formData.discount} className="mt-4 bg-[#C4818A] hover:bg-[#B06E77]">Create Coupon</Button>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
 
         {/* Stats */}
@@ -117,9 +194,8 @@ export default function AdminCouponsPage() {
                     </td>
                     <td className="py-3 px-4 text-sm">{new Date(coupon.expiresAt).toLocaleDateString()}</td>
                     <td className="py-3 px-4">
-                      <span className={`inline-flex px-2 py-1 text-xs rounded-full font-medium ${
-                        coupon.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-                      }`}>
+                      <span className={`inline-flex px-2 py-1 text-xs rounded-full font-medium ${coupon.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                        }`}>
                         {coupon.status}
                       </span>
                     </td>

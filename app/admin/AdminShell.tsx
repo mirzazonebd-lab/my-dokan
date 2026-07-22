@@ -37,7 +37,7 @@ export default function AdminLayout({
   activeTab: string;
 }) {
   const router = useRouter();
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading: authLoading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [pendingOrders, setPendingOrders] = useState(0);
@@ -48,10 +48,28 @@ export default function AdminLayout({
     setPendingOrders(pending);
   }, []);
 
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/admin/login');
+    }
+  }, [authLoading, user, router]);
+
   const handleSignOut = async () => {
     await signOut();
-    router.push('/');
+    router.push('/admin/login');
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#1C1C2E] flex items-center justify-center">
+        <div className="animate-spin w-12 h-12 border-4 border-[#C4818A] border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -83,9 +101,9 @@ export default function AdminLayout({
             {sidebarOpen && (
               <span className="font-bold text-xl">
                 <div className="flex items-center gap-2">
-  <span className="text-[#C4818A] font-bold">Beauty</span>
-  <span className="font-bold text-white">Dokan BD</span>
-</div>
+                  <span className="text-[#C4818A] font-bold">Beauty</span>
+                  <span className="font-bold text-white">Dokan BD</span>
+                </div>
               </span>
             )}
             <button
@@ -103,11 +121,10 @@ export default function AdminLayout({
                 key={item.id}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                  activeTab === item.id
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${activeTab === item.id
                     ? 'bg-[#C4818A] text-white'
                     : 'text-gray-300 hover:bg-white/10 hover:text-white'
-                }`}
+                  }`}
               >
                 {item.icon}
                 {sidebarOpen && (
