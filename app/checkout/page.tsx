@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const ORDERS_KEY = 'beautydokanbd_orders';
+const SETTINGS_KEY = 'beautydokanbd_admin_settings';
 
 const DHAKA_THANAS = [
   'Mirpur', 'Mohammadpur', 'Gulshan', 'Banani', 'Uttara', 'Dhanmondi',
@@ -39,10 +40,19 @@ const DISTRICT_THANAS: Record<string, string[]> = {
   Mymensingh: ['Mymensingh City', 'Trishal', 'Bhaluka', 'Muktagacha', 'Fulbaria'],
 };
 
-const SHIPPING_INSIDE  = 60;
-const SHIPPING_OUTSIDE = 120;
-
-const COUPONS: Record<string, number> = { WELCOME10: 10, SKIN20: 20, BEAUTY15: 15 };
+// Default settings
+const DEFAULT_SETTINGS = {
+  storeName: 'Beauty Dokan BD',
+  storeEmail: 'info@beautydokan.com',
+  storePhone: '+8801712012737',
+  freeShippingThreshold: 1500,
+  deliveryCharge: 60,
+  codEnabled: true,
+  bkashEnabled: true,
+  nagadEnabled: true,
+  emailNotifications: true,
+  orderConfirmationSMS: true,
+};
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -74,8 +84,8 @@ const STEP_LABELS: Record<Step, string> = {
   cart: 'Cart', info: 'Information', shipping: 'Shipping', payment: 'Payment', review: 'Review',
 };
 
-function calcShipping(district: string): number {
-  return district === 'Dhaka' ? SHIPPING_INSIDE : SHIPPING_OUTSIDE;
+function calcShipping(district: string, settings: any): number {
+  return district === 'Dhaka' ? settings.deliveryCharge : settings.deliveryCharge * 2;
 }
 
 function getThanas(district: string): string[] {
@@ -192,15 +202,17 @@ function PaymentOption({ value, selected, onSelect, icon, iconBg, label, descrip
 function OrderSummary({
   items, subtotal, shippingCost, discount, couponCode,
   couponApplied, couponError, onCouponChange, onApplyCoupon,
-  showCoupon, payment,
+  showCoupon, payment, coupons, freeShippingThreshold,
 }: {
   items: any[]; subtotal: number; shippingCost: number; discount: number;
   couponCode: string; couponApplied: boolean; couponError: string;
   onCouponChange: (v: string) => void; onApplyCoupon: () => void;
-  showCoupon: boolean; payment: PaymentMethod;
+  showCoupon: boolean; payment: PaymentMethod; coupons: any[]; freeShippingThreshold: number;
 }) {
   const grandTotal = subtotal + shippingCost - discount;
   const paymentLabel = payment === 'cod' ? 'Cash on Delivery' : payment === 'bkash' ? 'bKash' : payment === 'nagad' ? 'Nagad' : payment === 'rocket' ? 'Rocket' : 'Bank Transfer';
+  const isFreeShipping = subtotal >= freeShippingThreshold;
+  
   return (
     <div className="sticky top-24 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-5">
       <h2 className="text-base font-semibold text-gray-900">Order Summary</h2>
@@ -259,8 +271,8 @@ function OrderSummary({
         </div>
         <div className="flex justify-between text-sm text-gray-600">
           <span>Delivery</span>
-          <span className={shippingCost === 0 ? 'text-green-600 font-medium' : ''}>
-            {shippingCost === 0 ? 'FREE' : `৳${shippingCost}`}
+          <span className={isFreeShipping ? 'text-green-600 font-medium' : ''}>
+            {isFreeShipping ? 'FREE' : `৳${shippingCost}`}
           </span>
         </div>
         <div className="flex justify-between text-base font-bold pt-2.5 border-t border-gray-100">
@@ -275,11 +287,11 @@ function OrderSummary({
         </div>
       </div>
 
-      {shippingCost > 0 && (
+      {shippingCost > 0 && !isFreeShipping && (
         <div className="bg-amber-50 rounded-xl p-3 flex items-start gap-2">
           <Sparkles size={14} className="text-amber-600 mt-0.5 flex-shrink-0" />
           <p className="text-xs text-amber-700">
-            {`Dhaka: ৳${SHIPPING_INSIDE} • Other districts: ৳${SHIPPING_OUTSIDE}`}
+            Free shipping on orders above ৳{freeShippingThreshold.toLocaleString()}
           </p>
         </div>
       )}
@@ -299,7 +311,8 @@ function CheckoutContent() {
   const [loading, setLoading]       = useState(false);
   const [hasHydratedFromUrl, setHasHydratedFromUrl] = useState(false);
   const [urlHydrationInProgress, setUrlHydrationInProgress] = useState(false);
-
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const [coupons, setCoupons] = useState<any[]>([]);
 
   // Customer info
   const [info, setInfo]             = useState<CustomerInfo>({ fullName: '', mobile: '', email: '' });
@@ -320,10 +333,30 @@ function CheckoutContent() {
   const [couponError, setCouponError]     = useState('');
   const [discount, setDiscount]           = useState(0);
 
+  // Load settings on mount
+  useEffect(() => {
+    const storedSettings = localStorage.getItem(SETTINGS_KEY);
+    if (storedSettings) {
+      try {
+        setSettings(JSON.parse(storedSettings));
+      } catch {
+        // Use defaults
+      }
+    }
+
+    // Load all coupons from admin
+    const storedCoupons = localStorage.getItem('beautydokanbd_admin_coupons');
+    if (storedCoupons) {
+      try {
+        setCoupons(JSON.parse(storedCoupons));
+      } catch {
+        // No coupons
+      }
+    }
+  }, []);
+
   useEffect(() => { setMounted(true); }, []);
 
-  
-  // Fallback: if cart is empty but product and qty provided in URL, add item.
   const tryHydrateFromUrl = async () => {
     try {
       if (!mounted) return;
@@ -339,7 +372,6 @@ function CheckoutContent() {
       const prod = (products as Product[]).find(p => p.id === productId || p.slug === productId);
       if (!prod) return;
 
-      // await addItem(prod, qty);
       setHasHydratedFromUrl(true);
       setStep('info');
       router.replace('/checkout');
@@ -348,9 +380,6 @@ function CheckoutContent() {
     }
   };
 
-  // Run URL hydration once when mounted or when searchParams change.
-  // URL hydration is deliberately run only when its route inputs change.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
@@ -366,31 +395,32 @@ function CheckoutContent() {
     else setUrlHydrationInProgress(false);
 
     return () => { cancelled = true; };
-  // tryHydrateFromUrl intentionally remains local to avoid re-triggering the URL hydration loop.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted, searchParams, addItem]);
+
   useEffect(() => {
-    // Wait for cart provider and URL hydration attempt to finish before redirecting away from checkout
     if (mounted && !cartLoading && !urlHydrationInProgress && items.length === 0 && step !== 'review') router.push('/shop');
   }, [mounted, cartLoading, urlHydrationInProgress, items.length, step, router]);
 
-  const shippingCost = ship.district ? calcShipping(ship.district) : SHIPPING_INSIDE;
+  const shippingCost = ship.district ? (subtotal >= settings.freeShippingThreshold ? 0 : calcShipping(ship.district, settings)) : settings.deliveryCharge;
   const grandTotal   = subtotal + shippingCost - discount;
   const thanas       = getThanas(ship.district);
 
   // ── Coupon ──
   const applyCoupon = useCallback(() => {
-    const pct = COUPONS[couponCode];
-    if (pct) {
+    const coupon = coupons.find(c => c.code === couponCode);
+    if (coupon && coupon.status === 'active') {
+      const discountAmount = coupon.discountType === 'percentage' 
+        ? Math.round(subtotal * (coupon.discount / 100))
+        : coupon.discount;
       setCouponApplied(true);
-      setDiscount(Math.round(subtotal * (pct / 100)));
+      setDiscount(discountAmount);
       setCouponError('');
     } else {
       setCouponApplied(false);
       setDiscount(0);
-      setCouponError('Invalid coupon code');
+      setCouponError('Invalid or expired coupon code');
     }
-  }, [couponCode, subtotal]);
+  }, [couponCode, coupons, subtotal]);
 
   const handleCouponChange = (v: string) => {
     setCouponCode(v);
@@ -520,8 +550,6 @@ function CheckoutContent() {
 
   if (!mounted) return null;
 
-  // While the cart provider is hydrating, show a loading state so the checkout
-  // form doesn't disappear and cause a confusing blank screen.
   if (cartLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -647,13 +675,13 @@ function CheckoutContent() {
                   <div className="flex gap-3 mb-5">
                     <ZoneChip
                       label="Inside Dhaka"
-                      sub={`৳${SHIPPING_INSIDE} delivery`}
+                      sub={`৳${settings.deliveryCharge} delivery`}
                       active={isDhaka(ship.district)}
                       color="blue"
                     />
                     <ZoneChip
                       label="Outside Dhaka"
-                      sub={`৳${SHIPPING_OUTSIDE} delivery`}
+                      sub={`৳${settings.deliveryCharge * 2} delivery`}
                       active={!isDhaka(ship.district)}
                       color="orange"
                     />
@@ -702,11 +730,20 @@ function CheckoutContent() {
                           {isDhaka(ship.district) ? 'Dhaka' : 'Outside Dhaka'} Delivery
                         </p>
                         <p className="text-xs text-gray-500">
-                          Charge: <strong>৳{shippingCost}</strong> •{' '}
+                          Charge: <strong>৳{shippingCost === 0 ? 'FREE' : shippingCost}</strong> •{' '}
                           Estimated: <strong>{isDhaka(ship.district) ? '2–3 business days' : '4–7 business days'}</strong>
                         </p>
                       </div>
                     </div>
+
+                    {subtotal >= settings.freeShippingThreshold && (
+                      <div className="bg-green-50 rounded-xl p-3 flex items-start gap-2 border border-green-100">
+                        <Check size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
+                        <p className="text-xs text-green-700">
+                          You qualified for free shipping! (Orders above ৳{settings.freeShippingThreshold.toLocaleString()})
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <NavButtons onBack={goBack} onNext={goNext} />
                 </Card>
@@ -765,7 +802,7 @@ function CheckoutContent() {
                   {requiresAdvanceProof && (
                     <div className="rounded-xl p-4 mt-3 bg-rose-50 border border-rose-100">
                       <p className="text-sm font-semibold text-gray-900 mb-3">Advance Payment Details</p>
-                      {payment === 'bank' ? <div className="text-xs text-gray-700 space-y-1 mb-4"><p><strong>Bank Name:</strong> Beauty Dokan BD Bank</p><p><strong>Account Name:</strong> Beauty Dokan BD</p><p><strong>Account Number:</strong> 1234567890</p><p><strong>Routing Number:</strong> 123456789</p></div> : <p className="text-xs text-gray-700 mb-4"><strong>Merchant Number:</strong> 01712-012737 ({payment === 'bkash' ? 'bKash' : payment === 'nagad' ? 'Nagad' : 'Rocket'})</p>}
+                      {payment === 'bank' ? <div className="text-xs text-gray-700 space-y-1 mb-4"><p><strong>Bank Name:</strong> Beauty Dokan BD Bank</p><p><strong>Account Name:</strong> Beauty Dokan BD</p><p><strong>Account Number:</strong> 1234567890</p><p><strong>Routing Number:</strong> [REDACTED]</p></div> : <p className="text-xs text-gray-700 mb-4"><strong>Merchant Number:</strong> 01712-012737 ({payment === 'bkash' ? 'bKash' : payment === 'nagad' ? 'Nagad' : 'Rocket'})</p>}
                       <div className="grid sm:grid-cols-2 gap-3"><Field label="Transaction ID" required><Input value={paymentInfo.transactionId} onChange={e => setPaymentInfo(p => ({ ...p, transactionId: e.target.value }))} placeholder="Enter transaction ID" /></Field><Field label="Payment Screenshot"><label className="flex h-10 items-center gap-2 rounded-lg border border-dashed border-gray-300 px-3 cursor-pointer hover:border-[#C4818A] transition-colors text-xs text-gray-600"><Upload size={15} /> {paymentInfo.screenshotName || 'Upload JPG, PNG or PDF'}<input type="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" className="sr-only" onChange={e => handleScreenshot(e.target.files?.[0])} /></label></Field></div>
                     </div>
                   )}
@@ -854,7 +891,7 @@ function CheckoutContent() {
                       )}
                       <div className="flex justify-between text-gray-600">
                         <span>Delivery ({isDhaka(ship.district) ? 'Dhaka' : 'Outside Dhaka'})</span>
-                        <span>৳{shippingCost}</span>
+                        <span>{shippingCost === 0 ? 'FREE' : `৳${shippingCost}`}</span>
                       </div>
                       <div className="flex justify-between text-base font-bold pt-2 border-t border-gray-100">
                         <span>Grand Total</span>
@@ -897,6 +934,8 @@ function CheckoutContent() {
                 onApplyCoupon={applyCoupon}
                 showCoupon={step !== 'cart'}
                 payment={payment}
+                coupons={coupons}
+                freeShippingThreshold={settings.freeShippingThreshold}
               />
             </div>
           </div>

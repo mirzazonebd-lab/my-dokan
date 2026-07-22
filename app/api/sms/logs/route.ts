@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { requireSmsAuthorization } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase/server';
+
+export const runtime = 'nodejs';
+
 export async function GET(request: Request) {
   try {
     await requireSmsAuthorization(request);

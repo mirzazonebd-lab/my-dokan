@@ -22,6 +22,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'beautydokanbd_auth';
 const PROFILE_KEY = 'beautydokanbd_profile';
+const AUTH_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+interface StoredAuth {
+  user: User;
+  expiresAt: number;
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -29,15 +35,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load auth state from localStorage
+    // Load auth state from localStorage with expiry check
     const storedAuth = localStorage.getItem(STORAGE_KEY);
     const storedProfile = localStorage.getItem(PROFILE_KEY);
 
     if (storedAuth) {
       try {
-        const authData = JSON.parse(storedAuth);
-        setUser(authData.user);
-        setProfile(storedProfile ? JSON.parse(storedProfile) : { ...DEMO_USER, email: authData.user.email });
+        const authData: StoredAuth = JSON.parse(storedAuth);
+        if (authData.expiresAt && Date.now() > authData.expiresAt) {
+          // Session expired
+          localStorage.removeItem(STORAGE_KEY);
+          localStorage.removeItem(PROFILE_KEY);
+        } else {
+          setUser(authData.user);
+          setProfile(storedProfile ? JSON.parse(storedProfile) : { ...DEMO_USER, email: authData.user.email });
+        }
       } catch {
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(PROFILE_KEY);
@@ -49,7 +61,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, fullName?: string) => {
     try {
-      // Demo signup - always succeeds
+      // DEMO MODE: validates email format only
+      if (!email || !email.includes('@')) {
+        return { error: new Error('Invalid email format') };
+      }
+      if (!password || password.length < 6) {
+        return { error: new Error('Password must be at least 6 characters') };
+      }
+
       const newUser: User = {
         id: `user-${Date.now()}`,
         email,
@@ -65,7 +84,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(newUser);
       setProfile(newProfile);
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: newUser }));
+      const authData: StoredAuth = { user: newUser, expiresAt: Date.now() + AUTH_EXPIRY_MS };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(authData));
       localStorage.setItem(PROFILE_KEY, JSON.stringify(newProfile));
 
       return { error: null };
@@ -76,7 +96,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      // Demo signin - always succeeds with any credentials
+      // DEMO MODE: validates email format only
+      if (!email || !email.includes('@')) {
+        return { error: new Error('Invalid email format') };
+      }
+      if (!password) {
+        return { error: new Error('Password is required') };
+      }
+
       const existingUser: User = {
         id: DEMO_USER.id,
         email,
@@ -90,7 +117,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(existingUser);
       setProfile(existingProfile);
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: existingUser }));
+      const authData: StoredAuth = { user: existingUser, expiresAt: Date.now() + AUTH_EXPIRY_MS };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(authData));
       localStorage.setItem(PROFILE_KEY, JSON.stringify(existingProfile));
 
       return { error: null };

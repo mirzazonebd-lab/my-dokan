@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Eye, ChevronDown, Filter, Search, CircleCheck as CheckCircle, Clock, Package, Truck, Circle as XCircle } from 'lucide-react';
+import { Eye, ChevronDown, Filter, Search, CircleCheck as CheckCircle, Clock, Package, Truck, Circle as XCircle, Download, Printer } from 'lucide-react';
 import { DEMO_ORDERS, getDemoOrderItems, Order, OrderItem } from '@/lib/demo-data';
 import AdminLayout from '../AdminShell';
 import { Button } from '@/components/ui/button';
@@ -59,6 +59,7 @@ export default function AdminOrdersPage() {
       }));
       setOrders(ordersWithItems);
       localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(ordersWithItems));
+      localStorage.setItem(CHECKOUT_ORDERS_KEY, JSON.stringify(ordersWithItems));
     }
     setLoading(false);
   };
@@ -69,8 +70,8 @@ export default function AdminOrdersPage() {
     );
     setOrders(updatedOrders);
     localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(updatedOrders));
+    localStorage.setItem(CHECKOUT_ORDERS_KEY, JSON.stringify(updatedOrders));
     setSelectedOrder(prev => prev ? { ...prev, status } : null);
-    setDialogOpen(false);
   };
 
   const updatePaymentStatus = (orderId: string, payment_status: typeof paymentStatusOptions[number]) => {
@@ -79,6 +80,211 @@ export default function AdminOrdersPage() {
     localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(updatedOrders));
     localStorage.setItem(CHECKOUT_ORDERS_KEY, JSON.stringify(updatedOrders));
     setSelectedOrder(prev => prev ? { ...prev, payment_status } : null);
+  };
+
+  const downloadOrderDetails = (order: OrderWithItems) => {
+    const content = `
+═══════════════════════════════════════════
+          BEAUTY DOKAN BD - ORDER DETAILS
+═══════════════════════════════════════════
+
+ORDER NUMBER: ${order.order_number}
+ORDER DATE: ${new Date(order.created_at).toLocaleDateString()}
+ORDER STATUS: ${order.status.toUpperCase()}
+
+───────────────────────────────────────────
+CUSTOMER INFORMATION
+───────────────────────────────────────────
+Name: ${order.shipping_address?.name || 'N/A'}
+Phone: ${order.shipping_address?.phone || 'N/A'}
+Email: ${order.shipping_address?.email || 'N/A'}
+Address: ${order.shipping_address?.address || 'N/A'}
+City: ${order.shipping_address?.city || 'N/A'}
+District: ${order.shipping_address?.district || 'N/A'}
+Postal Code: ${order.shipping_address?.postal_code || 'N/A'}
+
+───────────────────────────────────────────
+PAYMENT INFORMATION
+───────────────────────────────────────────
+Payment Method: ${order.payment_method === 'cod' ? 'Cash on Delivery' : order.payment_method}
+Payment Status: ${order.payment_status}
+Transaction ID: ${order.transaction_id || 'N/A'}
+
+───────────────────────────────────────────
+ORDER ITEMS
+───────────────────────────────────────────
+${order.items.map(item => `
+Product: ${item.product_name}
+Brand: ${item.brand}
+Quantity: ${item.quantity}
+Price: ৳${item.price.toLocaleString()}
+Subtotal: ৳${item.subtotal.toLocaleString()}
+`).join('\n')}
+
+───────────────────────────────────────────
+ORDER SUMMARY
+───────────────────────────────────────────
+Subtotal: ৳${order.subtotal.toLocaleString()}
+${order.discount > 0 ? `Discount: -৳${order.discount.toLocaleString()}\n` : ''}Shipping: ${order.shipping === 0 ? 'FREE' : `৳${order.shipping.toLocaleString()}`}
+───────────────────────────────────────────
+TOTAL: ৳${order.total.toLocaleString()}
+═══════════════════════════════════════════
+
+Downloaded on: ${new Date().toLocaleString()}
+    `;
+
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+    element.setAttribute('download', `order-${order.order_number}.txt`);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
+  const printOrderDetails = (order: OrderWithItems) => {
+    const printWindow = window.open('', '', 'height=600,width=800');
+    if (!printWindow) return;
+
+    const content = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order ${order.order_number}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #C4818A; padding-bottom: 10px; }
+        .section { margin-bottom: 20px; }
+        .section-title { font-weight: bold; font-size: 14px; background: #f0f0f0; padding: 5px; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f0f0f0; }
+        .total { font-weight: bold; font-size: 16px; }
+        .summary-row { display: flex; justify-content: space-between; padding: 8px 0; }
+        .footer { margin-top: 30px; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>BEAUTY DOKAN BD</h1>
+        <p>Order Details</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Order Information</div>
+        <div class="summary-row">
+            <span>Order Number:</span>
+            <strong>${order.order_number}</strong>
+        </div>
+        <div class="summary-row">
+            <span>Order Date:</span>
+            <strong>${new Date(order.created_at).toLocaleDateString()}</strong>
+        </div>
+        <div class="summary-row">
+            <span>Status:</span>
+            <strong>${order.status.toUpperCase()}</strong>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Customer Information</div>
+        <div class="summary-row">
+            <span>Name:</span>
+            <strong>${order.shipping_address?.name || 'N/A'}</strong>
+        </div>
+        <div class="summary-row">
+            <span>Phone:</span>
+            <strong>${order.shipping_address?.phone || 'N/A'}</strong>
+        </div>
+        <div class="summary-row">
+            <span>Email:</span>
+            <strong>${order.shipping_address?.email || 'N/A'}</strong>
+        </div>
+        <div class="summary-row">
+            <span>Address:</span>
+            <strong>${order.shipping_address?.address || 'N/A'}</strong>
+        </div>
+        <div class="summary-row">
+            <span>City/District:</span>
+            <strong>${order.shipping_address?.city || 'N/A'}, ${order.shipping_address?.district || 'N/A'}</strong>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Order Items</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Brand</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${order.items.map(item => `
+                    <tr>
+                        <td>${item.product_name}</td>
+                        <td>${item.brand}</td>
+                        <td>${item.quantity}</td>
+                        <td>৳${item.price.toLocaleString()}</td>
+                        <td>৳${item.subtotal.toLocaleString()}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Payment Information</div>
+        <div class="summary-row">
+            <span>Payment Method:</span>
+            <strong>${order.payment_method === 'cod' ? 'Cash on Delivery' : order.payment_method}</strong>
+        </div>
+        <div class="summary-row">
+            <span>Payment Status:</span>
+            <strong>${order.payment_status}</strong>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Order Summary</div>
+        <div class="summary-row">
+            <span>Subtotal:</span>
+            <strong>৳${order.subtotal.toLocaleString()}</strong>
+        </div>
+        ${order.discount > 0 ? `
+        <div class="summary-row">
+            <span>Discount:</span>
+            <strong>-৳${order.discount.toLocaleString()}</strong>
+        </div>
+        ` : ''}
+        <div class="summary-row">
+            <span>Shipping:</span>
+            <strong>${order.shipping === 0 ? 'FREE' : `৳${order.shipping.toLocaleString()}`}</strong>
+        </div>
+        <div class="summary-row total">
+            <span>TOTAL:</span>
+            <span>৳${order.total.toLocaleString()}</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Printed on: ${new Date().toLocaleString()}</p>
+        <p>This is an automated order summary. Please retain for your records.</p>
+    </div>
+
+    <script>
+        window.print();
+        window.close();
+    </script>
+</body>
+</html>
+    `;
+
+    printWindow.document.write(content);
+    printWindow.document.close();
   };
 
   const filteredOrders = orders.filter(order => {
@@ -206,8 +412,32 @@ export default function AdminOrdersPage() {
       {/* Order Detail Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
+          <DialogHeader className="flex flex-row items-center justify-between">
             <DialogTitle>Order {selectedOrder?.order_number}</DialogTitle>
+            <div className="flex gap-2">
+              {selectedOrder && (
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => selectedOrder && downloadOrderDetails(selectedOrder)}
+                    className="gap-2"
+                  >
+                    <Download size={16} />
+                    Download
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => selectedOrder && printOrderDetails(selectedOrder)}
+                    className="gap-2"
+                  >
+                    <Printer size={16} />
+                    Print
+                  </Button>
+                </>
+              )}
+            </div>
           </DialogHeader>
 
           {selectedOrder && (

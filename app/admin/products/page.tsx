@@ -12,7 +12,9 @@ import {
   PackageSearch,
   Loader2,
 } from 'lucide-react';
-import { products as initialProducts } from '@/lib/data/products';
+import { getProducts, deleteProduct, updateProduct, addProduct } from '@/lib/data/products';
+import { getBrands } from '@/lib/data/brands';
+import { getCategories } from '@/lib/data/categories';
 import AdminLayout from '../AdminShell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,6 +53,8 @@ export default function AdminProductsPage() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [brands, setBrands] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
 
   const defaultForm = {
     name: '',
@@ -63,6 +67,20 @@ export default function AdminProductsPage() {
   };
   const [formData, setFormData] = useState(defaultForm);
 
+  // Load products on mount
+  useEffect(() => {
+    const loadedProducts = getProducts() as any[];
+    setProducts(loadedProducts);
+    
+    const loadedBrands = getBrands();
+    setBrands(loadedBrands);
+    
+    const loadedCategories = getCategories();
+    setCategories(loadedCategories);
+    
+    setLoading(false);
+  }, []);
+
   // When sheet closes, clear editing state
   useEffect(() => {
     if (!isSheetOpen) {
@@ -70,27 +88,6 @@ export default function AdminProductsPage() {
       setFormData(defaultForm);
     }
   }, [isSheetOpen]);
-
-  useEffect(() => {
-    setProducts(initialProducts as any[]);
-    setLoading(false);
-  }, []);
-
-  const categories = useMemo(
-    () =>
-      Array.from(
-        new Set(products.map((p) => p.category).filter(Boolean))
-      ) as string[],
-    [products]
-  );
-
-  const brands = useMemo(
-    () =>
-      Array.from(
-        new Set(products.map((p) => p.brand).filter(Boolean))
-      ) as string[],
-    [products]
-  );
 
   const filteredProducts = useMemo(
     () =>
@@ -124,29 +121,25 @@ export default function AdminProductsPage() {
 
   const handleSaveProduct = async () => {
     setIsSubmitting(true);
-
-    // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 500));
 
     if (editingProduct) {
       // Update existing
-      const updatedProducts = products.map(p => {
-        if (p.id === editingProduct.id) {
-          return {
-            ...p,
-            name: formData.name,
-            slug: formData.name.toLowerCase().replace(/[\s_]+/g, '-').replace(/[^\w-]+/g, ''),
-            price: Number(formData.price),
-            stock: Number(formData.stock),
-            description: formData.description,
-            category: formData.category || null,
-            brand: formData.brand || null,
-            image: formData.image || '/placeholder.png',
-          };
-        }
-        return p;
-      });
+      const updated = {
+        ...editingProduct,
+        name: formData.name,
+        slug: formData.name.toLowerCase().replace(/[\s_]+/g, '-').replace(/[^\w-]+/g, ''),
+        price: Number(formData.price),
+        stock: Number(formData.stock),
+        description: formData.description,
+        category: formData.category || null,
+        brand: formData.brand || null,
+        image: formData.image || '/placeholder.png',
+      };
+      
+      const updatedProducts = products.map(p => p.id === editingProduct.id ? updated : p);
       setProducts(updatedProducts);
+      updateProduct(editingProduct.id, updated);
     } else {
       // Insert new
       const newProduct = {
@@ -161,8 +154,10 @@ export default function AdminProductsPage() {
         image: formData.image || '/placeholder.png',
         active: true,
         featured: false,
+        compare_price: null,
       };
       setProducts([newProduct as any, ...products]);
+      addProduct(newProduct as any);
     }
 
     setIsSheetOpen(false);
@@ -185,8 +180,10 @@ export default function AdminProductsPage() {
 
   const handleDeleteProduct = (id: string) => {
     if (confirm('Are you sure you want to delete this product?')) {
-      setProducts(products.filter(p => p.id !== id));
+      const updated = products.filter(p => p.id !== id);
+      setProducts(updated);
       setSelectedProducts(selectedProducts.filter(selId => selId !== id));
+      deleteProduct(id);
     }
   };
 
@@ -200,6 +197,14 @@ export default function AdminProductsPage() {
     };
     reader.readAsDataURL(file);
   };
+
+  const uniqueCategories = Array.from(
+    new Set(products.map((p) => p.category).filter(Boolean))
+  ) as string[];
+
+  const uniqueBrands = Array.from(
+    new Set(products.map((p) => p.brand).filter(Boolean))
+  ) as string[];
 
   return (
     <AdminLayout activeTab="products">
@@ -265,7 +270,7 @@ export default function AdminProductsPage() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="stock">Initial Stock</Label>
+                    <Label htmlFor="stock">Stock Quantity</Label>
                     <Input
                       id="stock"
                       type="number"
@@ -278,21 +283,31 @@ export default function AdminProductsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="brand">Brand</Label>
-                    <Input
+                    <select
                       id="brand"
-                      placeholder="Brand"
                       value={formData.brand}
                       onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                    />
+                      className="h-10 px-3 rounded-lg border border-gray-200"
+                    >
+                      <option value="">Select Brand</option>
+                      {uniqueBrands.map(b => (
+                        <option key={b} value={b}>{b}</option>
+                      ))}
+                    </select>
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="category">Category</Label>
-                    <Input
+                    <select
                       id="category"
-                      placeholder="Category"
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    />
+                      className="h-10 px-3 rounded-lg border border-gray-200"
+                    >
+                      <option value="">Select Category</option>
+                      {uniqueCategories.map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
                 <div className="grid gap-2">
@@ -307,7 +322,7 @@ export default function AdminProductsPage() {
                 </div>
                 <Button
                   onClick={handleSaveProduct}
-                  disabled={isSubmitting || !formData.name || !formData.price}
+                  disabled={isSubmitting || !formData.name || !formData.price || !formData.stock}
                   className="mt-4 bg-[#C4818A] hover:bg-[#B06E77]"
                 >
                   {isSubmitting ? (
@@ -342,7 +357,7 @@ export default function AdminProductsPage() {
             onChange={(e) => setFilterCategory(e.target.value)}
           >
             <option value="all">All Categories</option>
-            {categories.map((cat) => (
+            {uniqueCategories.map((cat) => (
               <option key={cat} value={cat}>
                 {cat}
               </option>
@@ -355,7 +370,7 @@ export default function AdminProductsPage() {
             onChange={(e) => setFilterBrand(e.target.value)}
           >
             <option value="all">All Brands</option>
-            {brands.map((brand) => (
+            {uniqueBrands.map((brand) => (
               <option key={brand} value={brand}>
                 {brand}
               </option>
@@ -373,7 +388,14 @@ export default function AdminProductsPage() {
               <Button variant="outline" size="sm">
                 Edit
               </Button>
-              <Button variant="outline" size="sm" className="text-red-600">
+              <Button variant="outline" size="sm" className="text-red-600" onClick={() => {
+                if (confirm(`Delete ${selectedProducts.length} products?`)) {
+                  const updated = products.filter(p => !selectedProducts.includes(p.id));
+                  setProducts(updated);
+                  selectedProducts.forEach(id => deleteProduct(id));
+                  setSelectedProducts([]);
+                }
+              }}>
                 Delete
               </Button>
             </div>
@@ -483,6 +505,7 @@ export default function AdminProductsPage() {
                           </Link>
                           <button
                             type="button"
+                            onClick={() => handleEditClick(product)}
                             className="text-gray-500 hover:text-[#C4818A] transition-colors"
                             aria-label="Edit product"
                           >
@@ -490,6 +513,7 @@ export default function AdminProductsPage() {
                           </button>
                           <button
                             type="button"
+                            onClick={() => handleDeleteProduct(product.id)}
                             className="text-red-500 hover:text-red-600 transition-colors"
                             aria-label="Delete product"
                           >

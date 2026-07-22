@@ -5,19 +5,17 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { LayoutDashboard, Package, ShoppingBag, Layers, Tag, Warehouse, Ticket, Users, ChartBar as BarChart3, FileText, Settings, LogOut, ChevronDown, Menu, X, Bell } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { DEMO_ORDERS } from '@/lib/demo-data';
 
 interface NavItem {
   id: string;
   label: string;
   icon: React.ReactNode;
   href: string;
-  badge?: number;
 }
 
 const navItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} />, href: '/admin' },
-  { id: 'orders', label: 'Orders', icon: <Package size={20} />, href: '/admin/orders', badge: 5 },
+  { id: 'orders', label: 'Orders', icon: <Package size={20} />, href: '/admin/orders' },
   { id: 'products', label: 'Products', icon: <ShoppingBag size={20} />, href: '/admin/products' },
   { id: 'categories', label: 'Categories', icon: <Layers size={20} />, href: '/admin/categories' },
   { id: 'brands', label: 'Brands', icon: <Tag size={20} />, href: '/admin/brands' },
@@ -41,12 +39,41 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [pendingOrders, setPendingOrders] = useState(0);
+  const [adminName, setAdminName] = useState('');
 
+  // Count pending orders from localStorage
   useEffect(() => {
-    // Count pending orders from demo data
-    const pending = DEMO_ORDERS.filter(o => o.status === 'pending').length;
-    setPendingOrders(pending);
+    const countPendingOrders = () => {
+      const storedOrders = localStorage.getItem('beautydokanbd_admin_orders') || localStorage.getItem('beautydokanbd_orders');
+      if (storedOrders) {
+        try {
+          const orders = JSON.parse(storedOrders);
+          const pending = orders.filter((o: any) => o.status === 'pending').length;
+          setPendingOrders(pending);
+        } catch {
+          setPendingOrders(0);
+        }
+      }
+    };
+
+    countPendingOrders();
+
+    // Listen for storage changes
+    const handleStorageChange = () => {
+      countPendingOrders();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
+
+  // Set admin name from user email
+  useEffect(() => {
+    if (user?.email) {
+      const name = user.email.split('@')[0];
+      setAdminName(name.charAt(0).toUpperCase() + name.slice(1));
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -70,6 +97,8 @@ export default function AdminLayout({
   if (!user) {
     return null;
   }
+
+  const userInitial = user.email.charAt(0).toUpperCase();
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -116,29 +145,36 @@ export default function AdminLayout({
 
           {/* Navigation */}
           <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-80px)]">
-            {navItems.map(item => (
-              <Link
-                key={item.id}
-                href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${activeTab === item.id
-                    ? 'bg-[#C4818A] text-white'
-                    : 'text-gray-300 hover:bg-white/10 hover:text-white'
-                  }`}
-              >
-                {item.icon}
-                {sidebarOpen && (
-                  <>
-                    <span className="flex-1">{item.label}</span>
-                    {item.badge && item.badge > 0 && (
-                      <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
-                        {item.badge}
-                      </span>
-                    )}
-                  </>
-                )}
-              </Link>
-            ))}
+            {navItems.map(item => {
+              let badge = 0;
+              if (item.id === 'orders') {
+                badge = pendingOrders;
+              }
+
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${activeTab === item.id
+                      ? 'bg-[#C4818A] text-white'
+                      : 'text-gray-300 hover:bg-white/10 hover:text-white'
+                    }`}
+                >
+                  {item.icon}
+                  {sidebarOpen && (
+                    <>
+                      <span className="flex-1">{item.label}</span>
+                      {badge > 0 && (
+                        <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                          {badge}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </Link>
+              );
+            })}
 
             {/* Sign Out */}
             <button
@@ -177,9 +213,9 @@ export default function AdminLayout({
               </button>
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-[#C4818A] flex items-center justify-center text-white text-sm font-medium">
-                  A
+                  {userInitial}
                 </div>
-                <span className="text-sm font-medium">Admin</span>
+                <span className="text-sm font-medium">{adminName}</span>
               </div>
             </div>
           </header>

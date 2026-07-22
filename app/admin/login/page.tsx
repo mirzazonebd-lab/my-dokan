@@ -15,28 +15,40 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const ADMIN_EMAIL = 'admin@ebeautydokan.com';
+  const ADMIN_PASSWORD = '@Aysha@1996@';
+
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     setLoading(true);
     setError('');
 
-    // Local admin verification since database isn't fully configured
-    if (email === 'admin@example.com' && password === 'admin123') {
-      const { error } = await signIn(email, password);
-
-      if (error) {
-        setError(error.message);
-        setLoading(false);
-        return;
-      }
-
-      router.push('/admin');
-      router.refresh();
-    } else {
+    // Verify credentials match exactly
+    if (email.trim() !== ADMIN_EMAIL) {
       setError('Invalid email or password.');
       setLoading(false);
+      return;
     }
+
+    if (password !== ADMIN_PASSWORD) {
+      setError('Invalid email or password.');
+      setLoading(false);
+      return;
+    }
+
+    // Credentials valid - sign in
+    const { error } = await signIn(email, password);
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+
+    // Success - redirect
+    router.push('/admin');
+    router.refresh();
   };
 
   return (
@@ -74,7 +86,7 @@ export default function AdminLoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="admin@example.com"
+                  placeholder="admin@ebeautydokan.com"
                   className="w-full pl-9 pr-3 py-2 text-sm text-gray-900 bg-transparent outline-none"
                 />
               </div>

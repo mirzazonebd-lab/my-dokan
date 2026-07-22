@@ -1,6 +1,6 @@
 import { Category } from './types';
 
-export const categories: Category[] = [
+const defaultCategories: Category[] = [
   {
     id: 'c001',
     name: 'Korean Skincare',
@@ -46,31 +46,48 @@ export const categories: Category[] = [
     productCount: 52,
     icon: '🧴',
   },
-  {
-    id: 'c006',
-    name: "Men's Grooming",
-    slug: 'mens-grooming',
-    image: 'https://images.pexels.com/photos/3738349/pexels-photo-3738349.jpeg?auto=compress&cs=tinysrgb&w=600',
-    description: 'Face wash, moisturiser, shaving & more for men',
-    productCount: 38,
-    icon: '🧔',
-  },
-  {
-    id: 'c007',
-    name: 'Fragrance',
-    slug: 'fragrance',
-    image: 'https://images.pexels.com/photos/3997390/pexels-photo-3997390.jpeg?auto=compress&cs=tinysrgb&w=600',
-    description: 'Perfumes, body mists & luxury scents',
-    productCount: 44,
-    icon: '🌹',
-  },
-  {
-    id: 'c008',
-    name: 'Sunscreen',
-    slug: 'sunscreen',
-    image: 'https://images.pexels.com/photos/4202325/pexels-photo-4202325.jpeg?auto=compress&cs=tinysrgb&w=600',
-    description: 'SPF protection for every skin type',
-    productCount: 30,
-    icon: '☀️',
-  },
 ];
+
+const CATEGORIES_STORAGE_KEY = 'beautydokanbd_admin_categories';
+
+export function getCategories(): Category[] {
+  if (typeof window === 'undefined') return defaultCategories;
+  
+  const stored = localStorage.getItem(CATEGORIES_STORAGE_KEY);
+  if (stored) {
+    try {
+      return JSON.parse(stored);
+    } catch {
+      return defaultCategories;
+    }
+  }
+  
+  localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(defaultCategories));
+  return defaultCategories;
+}
+
+export function addCategory(category: Category) {
+  if (typeof window === 'undefined') return;
+  
+  const categories = getCategories();
+  categories.unshift(category);
+  localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories));
+}
+
+export function updateCategory(id: string, updates: Partial<Category>) {
+  if (typeof window === 'undefined') return;
+  
+  const categories = getCategories();
+  const updated = categories.map(c => c.id === id ? { ...c, ...updates } : c);
+  localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(updated));
+}
+
+export function deleteCategory(id: string) {
+  if (typeof window === 'undefined') return;
+  
+  const categories = getCategories();
+  const updated = categories.filter(c => c.id !== id);
+  localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(updated));
+}
+
+export const categories: Category[] = defaultCategories;

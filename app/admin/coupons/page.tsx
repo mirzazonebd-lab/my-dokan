@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, CreditCard as Edit, Trash2, Ticket, Percent, Calendar, Users } from 'lucide-react';
+import { Plus, Pencil as Edit, Trash2, Ticket, Percent, Calendar, Users } from 'lucide-react';
 import AdminLayout from '../AdminShell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,6 +37,7 @@ const mockCoupons: Coupon[] = [
 export default function AdminCouponsPage() {
   const [coupons, setCoupons] = useState(mockCoupons);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
   const [formData, setFormData] = useState({
     code: '',
     discount: '',
@@ -44,21 +45,71 @@ export default function AdminCouponsPage() {
     minPurchase: '',
   });
 
-  const handleCreateCoupon = () => {
-    const newCoupon: Coupon = {
-      id: Math.random().toString(36).substr(2, 9),
-      code: formData.code.toUpperCase(),
-      discount: Number(formData.discount),
-      discountType: formData.discountType as any,
-      minPurchase: Number(formData.minPurchase),
-      usageLimit: 100,
-      usedCount: 0,
-      expiresAt: '2026-12-31',
-      status: 'active',
-    };
-    setCoupons([newCoupon, ...coupons]);
+  const handleOpenSheet = (coupon?: Coupon) => {
+    if (coupon) {
+      setEditingCoupon(coupon);
+      setFormData({
+        code: coupon.code,
+        discount: coupon.discount.toString(),
+        discountType: coupon.discountType,
+        minPurchase: coupon.minPurchase.toString(),
+      });
+    } else {
+      setEditingCoupon(null);
+      setFormData({ code: '', discount: '', discountType: 'percentage', minPurchase: '' });
+    }
+    setIsSheetOpen(true);
+  };
+
+  const handleSaveCoupon = () => {
+    if (!formData.code || !formData.discount) return;
+
+    let updatedCoupons;
+    if (editingCoupon) {
+      // Update existing
+      updatedCoupons = coupons.map(c =>
+        c.id === editingCoupon.id
+          ? {
+              ...c,
+              code: formData.code.toUpperCase(),
+              discount: Number(formData.discount),
+              discountType: formData.discountType as 'percentage' | 'fixed',
+              minPurchase: Number(formData.minPurchase),
+            }
+          : c
+      );
+      setCoupons(updatedCoupons);
+    } else {
+      // Add new
+      const newCoupon: Coupon = {
+        id: Math.random().toString(36).substr(2, 9),
+        code: formData.code.toUpperCase(),
+        discount: Number(formData.discount),
+        discountType: formData.discountType as 'percentage' | 'fixed',
+        minPurchase: Number(formData.minPurchase),
+        usageLimit: 100,
+        usedCount: 0,
+        expiresAt: '2026-12-31',
+        status: 'active',
+      };
+      updatedCoupons = [newCoupon, ...coupons];
+      setCoupons(updatedCoupons);
+    }
+
+    // Save to localStorage so checkout can read it
+    localStorage.setItem('beautydokanbd_admin_coupons', JSON.stringify(updatedCoupons));
+
     setIsSheetOpen(false);
+    setEditingCoupon(null);
     setFormData({ code: '', discount: '', discountType: 'percentage', minPurchase: '' });
+  };
+
+  const handleDeleteCoupon = (couponId: string, couponCode: string) => {
+    if (confirm(`Delete coupon "${couponCode}"?`)) {
+      const updatedCoupons = coupons.filter(c => c.id !== couponId);
+      setCoupons(updatedCoupons);
+      localStorage.setItem('beautydokanbd_admin_coupons', JSON.stringify(updatedCoupons));
+    }
   };
 
   return (
@@ -71,16 +122,16 @@ export default function AdminCouponsPage() {
           </div>
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
-              <Button className="bg-[#C4818A] hover:bg-[#B06E77]">
+              <Button onClick={() => handleOpenSheet()} className="bg-[#C4818A] hover:bg-[#B06E77]">
                 <Plus size={16} className="mr-1" />
                 Add Coupon
               </Button>
             </SheetTrigger>
             <SheetContent>
               <SheetHeader>
-                <SheetTitle>Add Coupon</SheetTitle>
+                <SheetTitle>{editingCoupon ? 'Edit Coupon' : 'Add Coupon'}</SheetTitle>
                 <SheetDescription>
-                  Create a new discount coupon.
+                  {editingCoupon ? 'Update the coupon details.' : 'Create a new discount coupon.'}
                 </SheetDescription>
               </SheetHeader>
               <div className="grid gap-4 py-4">
@@ -104,6 +155,18 @@ export default function AdminCouponsPage() {
                   />
                 </div>
                 <div className="grid gap-2">
+                  <Label htmlFor="discount-type">Discount Type</Label>
+                  <select
+                    id="discount-type"
+                    className="h-9 px-3 rounded-lg border border-gray-200"
+                    value={formData.discountType}
+                    onChange={e => setFormData({ ...formData, discountType: e.target.value as 'percentage' | 'fixed' })}
+                  >
+                    <option value="percentage">Percentage (%)</option>
+                    <option value="fixed">Fixed (৳)</option>
+                  </select>
+                </div>
+                <div className="grid gap-2">
                   <Label htmlFor="min-purchase">Minimum Purchase (৳)</Label>
                   <Input
                     id="min-purchase"
@@ -113,7 +176,13 @@ export default function AdminCouponsPage() {
                     onChange={e => setFormData({ ...formData, minPurchase: e.target.value })}
                   />
                 </div>
-                <Button onClick={handleCreateCoupon} disabled={!formData.code || !formData.discount} className="mt-4 bg-[#C4818A] hover:bg-[#B06E77]">Create Coupon</Button>
+                <Button
+                  onClick={handleSaveCoupon}
+                  disabled={!formData.code || !formData.discount}
+                  className="mt-4 bg-[#C4818A] hover:bg-[#B06E77]"
+                >
+                  {editingCoupon ? 'Update Coupon' : 'Create Coupon'}
+                </Button>
               </div>
             </SheetContent>
           </Sheet>
@@ -201,8 +270,8 @@ export default function AdminCouponsPage() {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center justify-center gap-1">
-                        <Button variant="ghost" size="sm"><Edit size={14} /></Button>
-                        <Button variant="ghost" size="sm"><Trash2 size={14} className="text-red-500" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleOpenSheet(coupon)}><Edit size={14} /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteCoupon(coupon.id, coupon.code)}><Trash2 size={14} className="text-red-500" /></Button>
                       </div>
                     </td>
                   </tr>

@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { Settings, Store, Bell, CreditCard, Truck, Mail, Shield, Globe } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Settings, Store, Bell, CreditCard, Truck, Mail, Shield, Globe, Check } from 'lucide-react';
 import AdminLayout from '../AdminShell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
+
+const SETTINGS_STORAGE_KEY = 'beautydokanbd_admin_settings';
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState({
@@ -21,10 +23,61 @@ export default function AdminSettingsPage() {
     orderConfirmationSMS: true,
   });
 
+  const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Load settings from localStorage on mount
+  useEffect(() => {
+    const storedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    if (storedSettings) {
+      try {
+        const parsed = JSON.parse(storedSettings);
+        setSettings(parsed);
+      } catch {
+        // Use defaults if parse fails
+      }
+    }
+    setLoading(false);
+  }, []);
+
+  const handleSaveSettings = async () => {
+    setLoading(true);
+    
+    // Simulate save delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Save to localStorage
+    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+    
+    setSaved(true);
+    setLoading(false);
+
+    // Hide success message after 3 seconds
+    setTimeout(() => setSaved(false), 3000);
+  };
+
+  if (loading) {
+    return (
+      <AdminLayout activeTab="settings">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin w-12 h-12 border-4 border-[#C4818A] border-t-transparent rounded-full" />
+        </div>
+      </AdminLayout>
+    );
+  }
+
   return (
     <AdminLayout activeTab="settings">
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+          {saved && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg">
+              <Check size={16} />
+              <span className="text-sm font-medium">Settings saved successfully</span>
+            </div>
+          )}
+        </div>
 
         <div className="grid gap-6">
           {/* Store Settings */}
@@ -168,7 +221,13 @@ export default function AdminSettingsPage() {
         </div>
 
         <div className="flex justify-end">
-          <Button className="bg-[#C4818A] hover:bg-[#B06E77]">Save Changes</Button>
+          <Button 
+            onClick={handleSaveSettings}
+            disabled={loading}
+            className="bg-[#C4818A] hover:bg-[#B06E77]"
+          >
+            {loading ? 'Saving...' : 'Save Changes'}
+          </Button>
         </div>
       </div>
     </AdminLayout>
