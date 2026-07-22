@@ -15,7 +15,7 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const ADMIN_EMAIL = 'admin@ebeautydokan.com';
+  const ADMIN_EMAIL = 'admin@beautydokan.com';
   const ADMIN_PASSWORD = '@Aysha@1996@';
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
