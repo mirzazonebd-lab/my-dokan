@@ -5,7 +5,12 @@ import { CartItem, Address } from '@/lib/demo-data';
 import { Product } from '@/lib/data/types';
 import { getProducts, updateProduct } from '@/lib/data/products';
 
-interface CartItemWithProduct extends CartItem {
+interface CartItemWithProduct {
+  id: string;
+  user_id: string;
+  quantity: number;
+  created_at: string;
+  updated_at: string;
   product: Product;
 }
 
@@ -41,7 +46,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const savedCart = localStorage.getItem(CART_STORAGE_KEY);
         if (savedCart) {
           const cartData = JSON.parse(savedCart);
-          const products = getProducts();
+          const products = await getProducts();
           const itemsWithProducts: CartItemWithProduct[] = cartData
             .map((item: { productId: string; quantity: number }) => {
               const product = products.find((p: Product) => p.id === item.productId);
@@ -49,7 +54,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
               return {
                 id: item.productId,
                 user_id: 'guest',
-                product_id: item.productId,
                 quantity: item.quantity,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
@@ -60,7 +64,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
           setItems(itemsWithProducts);
         }
-      } catch {
+      } catch (error) {
+        console.error('Error loading cart:', error);
         localStorage.removeItem(CART_STORAGE_KEY);
       } finally {
         setLoading(false);
@@ -74,7 +79,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!loading) {
       const cartData = items.map(item => ({
-        productId: item.product_id,
+        productId: item.product.id,
         quantity: item.quantity,
       }));
       localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartData));
@@ -83,11 +88,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = async (product: Product, quantity: number = 1) => {
     setItems(prev => {
-      const existing = prev.find(item => item.product_id === product.id);
+      const existing = prev.find(item => item.product.id === product.id);
 
       if (existing) {
         return prev.map(item =>
-          item.product_id === product.id
+          item.product.id === product.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
@@ -96,7 +101,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const newItem: CartItemWithProduct = {
         id: product.id,
         user_id: 'guest',
-        product_id: product.id,
         quantity,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -108,7 +112,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const removeItem = async (productId: string) => {
-    setItems(prev => prev.filter(item => item.product_id !== productId));
+    setItems(prev => prev.filter(item => item.product.id !== productId));
   };
 
   const updateQuantity = async (productId: string, quantity: number) => {
@@ -119,7 +123,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     setItems(prev =>
       prev.map(item =>
-        item.product_id === productId ? { ...item, quantity } : item
+        item.product.id === productId ? { ...item, quantity } : item
       )
     );
   };
@@ -131,11 +135,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Decrease inventory for all items in cart (called on checkout success)
   const checkoutCart = async () => {
-    items.forEach(item => {
-      const newStock = Math.max(0, item.product.stock - item.quantity);
-      updateProduct(item.product_id, { stock: newStock });
-    });
-    await clearCart();
+    try {
+      for (const item of items) {
+        const newStock = Math.max(0, item.product.stock - item.quantity);
+        await updateProduct(item.product.id, { stock: newStock });
+      }
+      await clearCart();
+    } catch (error) {
+      console.error('Error during checkout:', error);
+    }
   };
 
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
