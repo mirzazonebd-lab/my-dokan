@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Plus, Pencil as Edit, Trash2, Package } from 'lucide-react';
-import { getCategories, addCategory, updateCategory, deleteCategory } from '@/lib/data/categories';
-import { getProducts } from '@/lib/data/products';
+import { Plus, Pencil as Edit, Trash2 } from 'lucide-react';
+import { useAuth } from '@/components/auth/AuthProvider';
 import AdminLayout from '../AdminShell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +18,7 @@ import {
 } from '@/components/ui/sheet';
 
 export default function AdminCategoriesPage() {
+  const { token } = useAuth();
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -26,14 +26,22 @@ export default function AdminCategoriesPage() {
   const [formData, setFormData] = useState({ name: '', description: '' });
 
   useEffect(() => {
-    const loadedCategories = getCategories();
-    setCategories(loadedCategories);
-    setLoading(false);
-  }, []);
+    const loadCategories = async () => {
+      try {
+        const response = await fetch('/api/admin/categories');
+        if (response.ok) {
+          const { data } = await response.json();
+          setCategories(data || []);
+        }
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const getProductCount = (categoryName: string) => {
-    return getProducts().filter(p => p.category === categoryName).length;
-  };
+    loadCategories();
+  }, []);
 
   const handleOpenSheet = (category?: any) => {
     if (category) {
@@ -46,44 +54,75 @@ export default function AdminCategoriesPage() {
     setIsSheetOpen(true);
   };
 
-  const handleSaveCategory = () => {
+  const handleSaveCategory = async () => {
     if (!formData.name) return;
 
-    if (editingCategory) {
-      // Update existing
-      const updated = {
-        ...editingCategory,
-        name: formData.name,
-        description: formData.description,
-      };
-      const updatedCategories = categories.map(c => c.id === editingCategory.id ? updated : c);
-      setCategories(updatedCategories);
-      updateCategory(editingCategory.id, updated);
-    } else {
-      // Add new
-      const newCategory = {
-        id: Math.random().toString(36).substr(2, 9),
-        name: formData.name,
-        slug: formData.name.toLowerCase().replace(/[\s_]+/g, '-'),
-        description: formData.description,
-        image: '/placeholder.png',
-        icon: '🛍️',
-        productCount: 0,
-      };
-      setCategories([newCategory, ...categories]);
-      addCategory(newCategory);
-    }
+    try {
+      if (editingCategory) {
+        const response = await fetch('/api/admin/categories', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-system-key': process.env.NEXT_PUBLIC_SYSTEM_API_KEY || '',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            id: editingCategory.id,
+            updates: {
+              name: formData.name,
+              description: formData.description,
+            },
+          }),
+        });
 
-    setIsSheetOpen(false);
-    setEditingCategory(null);
-    setFormData({ name: '', description: '' });
+        if (response.ok) {
+          const { data } = await response.json();
+          setCategories(categories.map(c => c.id === editingCategory.id ? data : c));
+        }
+      } else {
+        const response = await fetch('/api/admin/categories', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-system-key': process.env.NEXT_PUBLIC_SYSTEM_API_KEY || '',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            slug: formData.name.toLowerCase().replace(/[\s_]+/g, '-'),
+            description: formData.description,
+          }),
+        });
+
+        if (response.ok) {
+          const { data } = await response.json();
+          setCategories([data, ...categories]);
+        }
+      }
+
+      setIsSheetOpen(false);
+    } catch (error) {
+      console.error('Error saving category:', error);
+    }
   };
 
-  const handleDeleteCategory = (categoryId: string, categoryName: string) => {
+  const handleDeleteCategory = async (categoryId: string, categoryName: string) => {
     if (confirm(`Delete category "${categoryName}"?`)) {
-      const updated = categories.filter(c => c.id !== categoryId);
-      setCategories(updated);
-      deleteCategory(categoryId);
+      try {
+        const response = await fetch(`/api/admin/categories?id=${categoryId}`, {
+          method: 'DELETE',
+          headers: {
+            'x-system-key': process.env.NEXT_PUBLIC_SYSTEM_API_KEY || '',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          setCategories(categories.filter(c => c.id !== categoryId));
+        }
+      } catch (error) {
+        console.error('Error deleting category:', error);
+      }
     }
   };
 
@@ -174,9 +213,6 @@ export default function AdminCategoriesPage() {
                     <h3 className="font-semibold">{category.name}</h3>
                     <p className="text-sm text-gray-500 mt-1">{category.description}</p>
                   </div>
-                  <span className="text-xs px-2 py-1 bg-gray-100 rounded-full whitespace-nowrap ml-2">
-                    {getProductCount(category.name)} products
-                  </span>
                 </div>
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
                   <span className="text-xs text-gray-400">/{category.slug}</span>

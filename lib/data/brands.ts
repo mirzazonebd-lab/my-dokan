@@ -1,4 +1,5 @@
 import { Brand } from './types';
+import { getBrandsFromDB } from '@/lib/supabase/db';
 
 const defaultBrands: Brand[] = [
   {
@@ -23,95 +24,86 @@ const defaultBrands: Brand[] = [
     featured: true,
     productCount: 6,
   },
-  {
-    id: 'b003',
-    name: 'Anua',
-    slug: 'anua',
-    logo: 'https://images.pexels.com/photos/3762875/pexels-photo-3762875.jpeg?auto=compress&cs=tinysrgb&w=200',
-    country: 'South Korea',
-    description: 'Clean beauty brand focused on heartleaf for calming sensitive, acne-prone skin.',
-    isKorean: true,
-    featured: true,
-    productCount: 5,
-  },
-  {
-    id: 'b004',
-    name: 'SKIN1004',
-    slug: 'skin1004',
-    logo: 'https://images.pexels.com/photos/3738349/pexels-photo-3738349.jpeg?auto=compress&cs=tinysrgb&w=200',
-    country: 'South Korea',
-    description: 'Centella asiatica specialists. 1004 means "angel" in Korean.',
-    isKorean: true,
-    featured: true,
-    productCount: 4,
-  },
-  {
-    id: 'b005',
-    name: 'Round Lab',
-    slug: 'round-lab',
-    logo: 'https://images.pexels.com/photos/2253834/pexels-photo-2253834.jpeg?auto=compress&cs=tinysrgb&w=200',
-    country: 'South Korea',
-    description: 'Clean, honest skincare brand known for the Birch Juice line.',
-    isKorean: true,
-    featured: true,
-    productCount: 3,
-  },
-  {
-    id: 'b006',
-    name: 'Some By Mi',
-    slug: 'some-by-mi',
-    logo: 'https://images.pexels.com/photos/5069291/pexels-photo-5069291.jpeg?auto=compress&cs=tinysrgb&w=200',
-    country: 'South Korea',
-    description: 'Korean brand famous for the Miracle series.',
-    isKorean: true,
-    featured: true,
-    productCount: 5,
-  },
 ];
 
-const BRANDS_STORAGE_KEY = 'beautydokanbd_admin_brands';
-
-export function getBrands(): Brand[] {
-  if (typeof window === 'undefined') return defaultBrands;
-  
-  const stored = localStorage.getItem(BRANDS_STORAGE_KEY);
-  if (stored) {
-    try {
-      return JSON.parse(stored);
-    } catch {
-      return defaultBrands;
-    }
+export async function getBrands(): Promise<Brand[]> {
+  try {
+    return await getBrandsFromDB();
+  } catch (error) {
+    console.error('Failed to fetch brands from Supabase:', error);
+    return defaultBrands;
   }
-  
-  localStorage.setItem(BRANDS_STORAGE_KEY, JSON.stringify(defaultBrands));
-  return defaultBrands;
 }
 
-export function addBrand(brand: Brand) {
-  if (typeof window === 'undefined') return;
-  
-  const brands = getBrands();
-  brands.unshift(brand);
-  localStorage.setItem(BRANDS_STORAGE_KEY, JSON.stringify(brands));
+export async function addBrand(brand: Brand): Promise<Brand> {
+  try {
+    const response = await fetch('/api/admin/brands', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-system-key': process.env.NEXT_PUBLIC_SYSTEM_API_KEY || '',
+      },
+      body: JSON.stringify(brand),
+    });
+
+    if (!response.ok) throw new Error(`Failed to add brand: ${response.statusText}`);
+    const { data } = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error adding brand:', error);
+    throw error;
+  }
 }
 
-export function updateBrand(id: string, updates: Partial<Brand>) {
-  if (typeof window === 'undefined') return;
-  
-  const brands = getBrands();
-  const updated = brands.map(b => b.id === id ? { ...b, ...updates } : b);
-  localStorage.setItem(BRANDS_STORAGE_KEY, JSON.stringify(updated));
+export async function updateBrand(id: string, updates: Partial<Brand>): Promise<Brand> {
+  try {
+    const response = await fetch('/api/admin/brands', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-system-key': process.env.NEXT_PUBLIC_SYSTEM_API_KEY || '',
+      },
+      body: JSON.stringify({ id, updates }),
+    });
+
+    if (!response.ok) throw new Error(`Failed to update brand: ${response.statusText}`);
+    const { data } = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error updating brand:', error);
+    throw error;
+  }
 }
 
-export function deleteBrand(id: string) {
-  if (typeof window === 'undefined') return;
-  
-  const brands = getBrands();
-  const updated = brands.filter(b => b.id !== id);
-  localStorage.setItem(BRANDS_STORAGE_KEY, JSON.stringify(updated));
+export async function deleteBrand(id: string): Promise<void> {
+  try {
+    const response = await fetch(`/api/admin/brands?id=${id}`, {
+      method: 'DELETE',
+      headers: {
+        'x-system-key': process.env.NEXT_PUBLIC_SYSTEM_API_KEY || '',
+      },
+    });
+
+    if (!response.ok) throw new Error(`Failed to delete brand: ${response.statusText}`);
+  } catch (error) {
+    console.error('Error deleting brand:', error);
+    throw error;
+  }
 }
 
 export const brands: Brand[] = defaultBrands;
-export const getFeaturedBrands = () => getBrands().filter(b => b.featured);
-export const getKoreanBrands = () => getBrands().filter(b => b.isKorean);
-export const getInternationalBrands = () => getBrands().filter(b => !b.isKorean);
+
+export const getFeaturedBrands = async () => {
+  const all = await getBrands();
+  return all.filter(b => b.featured);
+};
+
+export const getKoreanBrands = async () => {
+  const all = await getBrands();
+  return all.filter(b => b.isKorean);
+};
+
+export const getInternationalBrands = async () => {
+  const all = await getBrands();
+  return all.filter(b => !b.isKorean);
+};

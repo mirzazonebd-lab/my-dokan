@@ -1,4 +1,5 @@
 import { Category } from './types';
+import { getCategoriesFromDB } from '@/lib/supabase/db';
 
 const defaultCategories: Category[] = [
   {
@@ -19,75 +20,71 @@ const defaultCategories: Category[] = [
     productCount: 95,
     icon: '💄',
   },
-  {
-    id: 'c003',
-    name: 'Skincare',
-    slug: 'skincare',
-    image: 'https://images.pexels.com/photos/3762875/pexels-photo-3762875.jpeg?auto=compress&cs=tinysrgb&w=600',
-    description: 'Moisturisers, serums, cleansers & essentials',
-    productCount: 88,
-    icon: '✨',
-  },
-  {
-    id: 'c004',
-    name: 'Hair Care',
-    slug: 'hair-care',
-    image: 'https://images.pexels.com/photos/5217882/pexels-photo-5217882.jpeg?auto=compress&cs=tinysrgb&w=600',
-    description: 'Shampoos, conditioners, masks & treatments',
-    productCount: 64,
-    icon: '💆',
-  },
-  {
-    id: 'c005',
-    name: 'Body Care',
-    slug: 'body-care',
-    image: 'https://images.pexels.com/photos/6621461/pexels-photo-6621461.jpeg?auto=compress&cs=tinysrgb&w=600',
-    description: 'Lotions, scrubs, body washes & oils',
-    productCount: 52,
-    icon: '🧴',
-  },
 ];
 
-const CATEGORIES_STORAGE_KEY = 'beautydokanbd_admin_categories';
-
-export function getCategories(): Category[] {
-  if (typeof window === 'undefined') return defaultCategories;
-  
-  const stored = localStorage.getItem(CATEGORIES_STORAGE_KEY);
-  if (stored) {
-    try {
-      return JSON.parse(stored);
-    } catch {
-      return defaultCategories;
-    }
+export async function getCategories(): Promise<Category[]> {
+  try {
+    return await getCategoriesFromDB();
+  } catch (error) {
+    console.error('Failed to fetch categories from Supabase:', error);
+    return defaultCategories;
   }
-  
-  localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(defaultCategories));
-  return defaultCategories;
 }
 
-export function addCategory(category: Category) {
-  if (typeof window === 'undefined') return;
-  
-  const categories = getCategories();
-  categories.unshift(category);
-  localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories));
+export async function addCategory(category: Category): Promise<Category> {
+  try {
+    const response = await fetch('/api/admin/categories', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-system-key': process.env.NEXT_PUBLIC_SYSTEM_API_KEY || '',
+      },
+      body: JSON.stringify(category),
+    });
+
+    if (!response.ok) throw new Error(`Failed to add category: ${response.statusText}`);
+    const { data } = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error adding category:', error);
+    throw error;
+  }
 }
 
-export function updateCategory(id: string, updates: Partial<Category>) {
-  if (typeof window === 'undefined') return;
-  
-  const categories = getCategories();
-  const updated = categories.map(c => c.id === id ? { ...c, ...updates } : c);
-  localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(updated));
+export async function updateCategory(id: string, updates: Partial<Category>): Promise<Category> {
+  try {
+    const response = await fetch('/api/admin/categories', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-system-key': process.env.NEXT_PUBLIC_SYSTEM_API_KEY || '',
+      },
+      body: JSON.stringify({ id, updates }),
+    });
+
+    if (!response.ok) throw new Error(`Failed to update category: ${response.statusText}`);
+    const { data } = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error updating category:', error);
+    throw error;
+  }
 }
 
-export function deleteCategory(id: string) {
-  if (typeof window === 'undefined') return;
-  
-  const categories = getCategories();
-  const updated = categories.filter(c => c.id !== id);
-  localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(updated));
+export async function deleteCategory(id: string): Promise<void> {
+  try {
+    const response = await fetch(`/api/admin/categories?id=${id}`, {
+      method: 'DELETE',
+      headers: {
+        'x-system-key': process.env.NEXT_PUBLIC_SYSTEM_API_KEY || '',
+      },
+    });
+
+    if (!response.ok) throw new Error(`Failed to delete category: ${response.statusText}`);
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    throw error;
+  }
 }
 
 export const categories: Category[] = defaultCategories;

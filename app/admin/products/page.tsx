@@ -12,9 +12,7 @@ import {
   PackageSearch,
   Loader2,
 } from 'lucide-react';
-import { getProducts, deleteProduct, updateProduct, addProduct } from '@/lib/data/products';
-import { getBrands } from '@/lib/data/brands';
-import { getCategories } from '@/lib/data/categories';
+import { useAuth } from '@/components/auth/AuthProvider';
 import AdminLayout from '../AdminShell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,6 +42,7 @@ type Product = {
 };
 
 export default function AdminProductsPage() {
+  const { token } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -69,16 +68,36 @@ export default function AdminProductsPage() {
 
   // Load products on mount
   useEffect(() => {
-    const loadedProducts = getProducts() as any[];
-    setProducts(loadedProducts);
-    
-    const loadedBrands = getBrands();
-    setBrands(loadedBrands);
-    
-    const loadedCategories = getCategories();
-    setCategories(loadedCategories);
-    
-    setLoading(false);
+    const loadData = async () => {
+      try {
+        // Load products
+        const prodRes = await fetch('/api/admin/products');
+        if (prodRes.ok) {
+          const { data } = await prodRes.json();
+          setProducts(data || []);
+        }
+
+        // Load brands
+        const brandRes = await fetch('/api/admin/brands');
+        if (brandRes.ok) {
+          const { data } = await brandRes.json();
+          setBrands(data || []);
+        }
+
+        // Load categories
+        const catRes = await fetch('/api/admin/categories');
+        if (catRes.ok) {
+          const { data } = await catRes.json();
+          setCategories(data || []);
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   // When sheet closes, clear editing state
@@ -121,47 +140,70 @@ export default function AdminProductsPage() {
 
   const handleSaveProduct = async () => {
     setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      if (editingProduct) {
+        // Update existing
+        const response = await fetch('/api/admin/products', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-system-key': process.env.NEXT_PUBLIC_SYSTEM_API_KEY || '',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            id: editingProduct.id,
+            updates: {
+              name: formData.name,
+              slug: formData.name.toLowerCase().replace(/[\s_]+/g, '-').replace(/[^\w-]+/g, ''),
+              price: Number(formData.price),
+              stock: Number(formData.stock),
+              description: formData.description,
+              category: formData.category || null,
+              brand: formData.brand || null,
+              image: formData.image || '/placeholder.png',
+            },
+          }),
+        });
 
-    if (editingProduct) {
-      // Update existing
-      const updated = {
-        ...editingProduct,
-        name: formData.name,
-        slug: formData.name.toLowerCase().replace(/[\s_]+/g, '-').replace(/[^\w-]+/g, ''),
-        price: Number(formData.price),
-        stock: Number(formData.stock),
-        description: formData.description,
-        category: formData.category || null,
-        brand: formData.brand || null,
-        image: formData.image || '/placeholder.png',
-      };
-      
-      const updatedProducts = products.map(p => p.id === editingProduct.id ? updated : p);
-      setProducts(updatedProducts);
-      updateProduct(editingProduct.id, updated);
-    } else {
-      // Insert new
-      const newProduct = {
-        id: Math.random().toString(36).substr(2, 9),
-        name: formData.name,
-        slug: formData.name.toLowerCase().replace(/[\s_]+/g, '-').replace(/[^\w-]+/g, ''),
-        price: Number(formData.price),
-        stock: Number(formData.stock),
-        description: formData.description,
-        category: formData.category || null,
-        brand: formData.brand || null,
-        image: formData.image || '/placeholder.png',
-        active: true,
-        featured: false,
-        compare_price: null,
-      };
-      setProducts([newProduct as any, ...products]);
-      addProduct(newProduct as any);
+        if (response.ok) {
+          const { data } = await response.json();
+          setProducts(products.map(p => p.id === editingProduct.id ? data : p));
+        }
+      } else {
+        // Add new
+        const response = await fetch('/api/admin/products', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-system-key': process.env.NEXT_PUBLIC_SYSTEM_API_KEY || '',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            slug: formData.name.toLowerCase().replace(/[\s_]+/g, '-').replace(/[^\w-]+/g, ''),
+            price: Number(formData.price),
+            stock: Number(formData.stock),
+            description: formData.description,
+            category: formData.category || null,
+            brand: formData.brand || null,
+            image: formData.image || '/placeholder.png',
+            active: true,
+            featured: false,
+          }),
+        });
+
+        if (response.ok) {
+          const { data } = await response.json();
+          setProducts([data, ...products]);
+        }
+      }
+
+      setIsSheetOpen(false);
+    } catch (error) {
+      console.error('Error saving product:', error);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsSheetOpen(false);
-    setIsSubmitting(false);
   };
 
   const handleEditClick = (product: any) => {
@@ -178,12 +220,24 @@ export default function AdminProductsPage() {
     setIsSheetOpen(true);
   };
 
-  const handleDeleteProduct = (id: string) => {
+  const handleDeleteProduct = async (id: string) => {
     if (confirm('Are you sure you want to delete this product?')) {
-      const updated = products.filter(p => p.id !== id);
-      setProducts(updated);
-      setSelectedProducts(selectedProducts.filter(selId => selId !== id));
-      deleteProduct(id);
+      try {
+        const response = await fetch(`/api/admin/products?id=${id}`, {
+          method: 'DELETE',
+          headers: {
+            'x-system-key': process.env.NEXT_PUBLIC_SYSTEM_API_KEY || '',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          setProducts(products.filter(p => p.id !== id));
+          setSelectedProducts(selectedProducts.filter(selId => selId !== id));
+        }
+      } catch (error) {
+        console.error('Error deleting product:', error);
+      }
     }
   };
 
@@ -290,8 +344,8 @@ export default function AdminProductsPage() {
                       className="h-10 px-3 rounded-lg border border-gray-200"
                     >
                       <option value="">Select Brand</option>
-                      {uniqueBrands.map(b => (
-                        <option key={b} value={b}>{b}</option>
+                      {brands.map(b => (
+                        <option key={b.id} value={b.name}>{b.name}</option>
                       ))}
                     </select>
                   </div>
@@ -304,8 +358,8 @@ export default function AdminProductsPage() {
                       className="h-10 px-3 rounded-lg border border-gray-200"
                     >
                       <option value="">Select Category</option>
-                      {uniqueCategories.map(c => (
-                        <option key={c} value={c}>{c}</option>
+                      {categories.map(c => (
+                        <option key={c.id} value={c.name}>{c.name}</option>
                       ))}
                     </select>
                   </div>
@@ -390,9 +444,7 @@ export default function AdminProductsPage() {
               </Button>
               <Button variant="outline" size="sm" className="text-red-600" onClick={() => {
                 if (confirm(`Delete ${selectedProducts.length} products?`)) {
-                  const updated = products.filter(p => !selectedProducts.includes(p.id));
-                  setProducts(updated);
-                  selectedProducts.forEach(id => deleteProduct(id));
+                  selectedProducts.forEach(id => handleDeleteProduct(id));
                   setSelectedProducts([]);
                 }
               }}>

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import ProductCard from '@/components/ui/ProductCard';
 import QuickView from '@/components/QuickView';
 import { getBestSellers, getNewArrivals, getFeaturedProducts } from '@/lib/data/products';
@@ -16,11 +16,30 @@ const tabs = [
 
 export default function BestSellers() {
   const [activeTab, setActiveTab] = useState('best');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
 
-  const activeTabData = tabs.find(t => t.id === activeTab);
-  const products = activeTabData ? activeTabData.fn().slice(0, 8) : [];
+  useEffect(() => {
+    const loadProducts = async () => {
+      setLoading(true);
+      try {
+        const activeTabData = tabs.find(t => t.id === activeTab);
+        if (activeTabData) {
+          const data = await activeTabData.fn();
+          setProducts((data || []).slice(0, 8));
+        }
+      } catch (error) {
+        console.error('Error loading products:', error);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, [activeTab]);
 
   const handleQuickView = (product: Product) => {
     setQuickViewProduct(product);
@@ -56,23 +75,42 @@ export default function BestSellers() {
             ))}
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="w-8 h-8 text-[#C4818A] animate-spin" />
+            </div>
+          )}
+
           {/* Product Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} onQuickView={handleQuickView} />
-            ))}
-          </div>
+          {!loading && (
+            <>
+              {products.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+                  {products.map((product) => (
+                    <ProductCard key={product.id} product={product} onQuickView={handleQuickView} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-gray-500">No products available</p>
+                </div>
+              )}
+            </>
+          )}
 
           {/* Bottom CTA */}
-          <div className="text-center mt-12">
-            <Link
-              href="/shop"
-              className="inline-flex items-center gap-2 bg-[#1C1C2E] hover:bg-[#2D2D44] text-white px-8 py-4 rounded-xl font-semibold transition-all hover:-translate-y-0.5"
-            >
-              View All Products
-              <ArrowRight size={18} />
-            </Link>
-          </div>
+          {!loading && products.length > 0 && (
+            <div className="text-center mt-12">
+              <Link
+                href="/shop"
+                className="inline-flex items-center gap-2 bg-[#1C1C2E] hover:bg-[#2D2D44] text-white px-8 py-4 rounded-xl font-semibold transition-all hover:-translate-y-0.5"
+              >
+                View All Products
+                <ArrowRight size={18} />
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
