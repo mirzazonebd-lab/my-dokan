@@ -15,8 +15,8 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const ADMIN_EMAIL = 'admin@beautydokan.com';
-  const ADMIN_PASSWORD = '@Aysha@1996@';
+  const ADMIN_EMAIL = 'beautydokanbd@gmail.com';
+  const ADMIN_PASSWORD = '@Araf@2024@';
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -86,7 +86,7 @@ export default function AdminLoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="admin@ebeautydokan.com"
+                  placeholder="beautydokanbd@gmail.com"
                   className="w-full pl-9 pr-3 py-2 text-sm text-gray-900 bg-transparent outline-none"
                 />
               </div>
