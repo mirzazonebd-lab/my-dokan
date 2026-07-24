@@ -594,17 +594,16 @@ function ProductCard({ product, onQuickView }: { product: Product; onQuickView: 
   return (
     <div className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all">
       <div className="relative aspect-square overflow-hidden bg-rose-50">
-        <a href={`/product/${product.slug}`}>
-          <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-        </a>
+        <Link href={`/product/${product.slug}`} className="block w-full h-full relative">
+          <Image src={product.image} alt={product.name} fill sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
+        </Link>
 
         {/* Badge */}
         {product.badge && (
-          <span className={`absolute top-2.5 left-2.5 px-2 py-0.5 text-[10px] font-bold rounded-full ${
-            product.badge === 'Best Seller' ? 'bg-amber-500 text-white' :
-            product.badge === 'New' ? 'bg-[#1C1C2E] text-white' :
-            product.badge === 'Sale' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700'
-          }`}>
+          <span className={`absolute top-2.5 left-2.5 px-2 py-0.5 text-[10px] font-bold rounded-full ${product.badge === 'Best Seller' ? 'bg-amber-500 text-white' :
+              product.badge === 'New' ? 'bg-[#1C1C2E] text-white' :
+                product.badge === 'Sale' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700'
+            }`}>
             {product.badge}
           </span>
         )}
@@ -684,7 +683,7 @@ function ProductListCard({ product, onQuickView }: { product: Product; onQuickVi
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-sm flex gap-4 p-4">
       <div className="relative w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden bg-rose-50">
-        <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+        <Image src={product.image} alt={product.name} fill sizes="128px" className="object-cover" />
         {product.discountPercent && product.discountPercent > 0 && (
           <span className="absolute top-2 left-2 px-2 py-0.5 bg-[#C4818A] text-white text-[10px] font-bold rounded-full">
             -{product.discountPercent}%

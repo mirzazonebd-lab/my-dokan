@@ -2,22 +2,27 @@ export interface Product {
   id: string;
   slug: string;
   name: string;
-  brand: string;
-  category: string;
+  brand: string | null;
+  category: string | null;
   price: number;
-  originalPrice?: number;
-  discountPercent?: number;
-  rating: number;
-  totalReviews: number;
-  stockStatus: string;
-  badge?: string;
-  shortDescription: string;
-  fullDescription: string;
-  ingredients: string;
-  skinType: string;
-  usageInstructions: string;
-  image: string;
-  gallery: string[];
+  compare_price?: number | null;
+  stock: number;
+  image: string | null;
+  badge?: string | null;
+  description?: string | null;
+  featured?: boolean;
+  active?: boolean;
+  rating?: number;
+  totalReviews?: number;
+  stockStatus?: string;
+  shortDescription?: string;
+  fullDescription?: string;
+  ingredients?: string;
+  skinType?: string;
+  usageInstructions?: string;
+  gallery?: string[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Review {
@@ -45,6 +50,9 @@ export interface Brand {
   isKorean: boolean;
   featured: boolean;
   productCount?: number;
+  is_korean?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Category {
@@ -55,4 +63,20 @@ export interface Category {
   description: string;
   productCount: number;
   icon: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Coupon {
+  id: string;
+  code: string;
+  discount_type: 'percentage' | 'fixed';
+  discount_value: number;
+  min_order_value?: number | null;
+  max_uses?: number | null;
+  used_count: number;
+  expires_at?: string | null;
+  active: boolean;
+  created_at?: string;
+  updated_at?: string;
 }

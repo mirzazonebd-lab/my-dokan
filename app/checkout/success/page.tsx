@@ -118,7 +118,7 @@ function buildInvoiceHTML(order: any): string {
   </div>
   <div class="ftr">
     <p>Thank you for shopping with <span class="brand">Beauty Dokan BD</span></p>
-    <p style="margin-top:4px">info@beautydokan.com • 01712-012737</p>
+    <p style="margin-top:4px">info@beautydokan.com • +8809638758429</p>
     <p style="margin-top:8px;font-size:11px">System-generated invoice – no signature required.</p>
   </div>
 </div>

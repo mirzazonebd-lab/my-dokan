@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '@/components/cart/CartStore';
 import LiveSearch from '@/components/LiveSearch';
+import { SITE_INFO } from '@/lib/config/site-info';
 
 const navItems = [
   { label: 'Home', href: '/' },
@@ -96,7 +97,7 @@ export default function Header() {
   const { items } = useCart();
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const cartTotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  const wishlistCount = 0; // Will be connected to wishlist store
+  const wishlistCount = 0;
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -121,27 +122,27 @@ export default function Header() {
 
   return (
     <>
-      {/* Top Bar */}
+      {/* Top Bar - Using Centralized Config */}
       <div className="bg-[#1C1C2E] text-white py-2 px-4 hidden md:block">
         <div className="max-w-7xl mx-auto flex items-center justify-between text-xs">
           <div className="flex items-center gap-6">
             <span className="flex items-center gap-1.5">
               <Truck size={12} className="text-pink-400" />
-              Free delivery on orders over ৳1500
+              {SITE_INFO.deliveryInfo.freeDeliveryText}
             </span>
             <span className="flex items-center gap-1.5">
               <MapPin size={12} className="text-pink-400" />
-              Delivering to all 64 districts
+              {SITE_INFO.deliveryInfo.deliveryDistrictsText}
             </span>
           </div>
           <div className="flex items-center gap-6">
             <span className="flex items-center gap-1.5">
               <Star size={12} className="text-yellow-400 fill-yellow-400" />
-              4.8/5 from 10,000+ customers
+              {SITE_INFO.reviews.ratingText} from {SITE_INFO.reviews.totalReviews.toLocaleString()} customers
             </span>
             <span className="flex items-center gap-1.5">
               <Phone size={12} className="text-pink-400" />
-              01712-012737
+              {SITE_INFO.phone}
             </span>
           </div>
         </div>
@@ -347,6 +348,8 @@ export default function Header() {
                 { label: 'New Arrivals ✨', href: '/new-arrivals' },
                 { label: 'About', href: '/about' },
                 { label: 'Contact', href: '/contact' },
+                { label: 'Sign In', href: '/auth/signin' },
+                { label: 'My Account', href: '/account' },
               ].map((item) => (
                 <Link
                   key={item.label}
@@ -359,19 +362,19 @@ export default function Header() {
               ))}
             </nav>
 
-            {/* Mobile Footer Info */}
+            {/* Mobile Footer Info - Using Centralized Config */}
             <div className="p-4 border-t border-rose-100 space-y-3">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Truck size={16} className="text-[#C4818A]" />
-                <span>Free delivery over ৳1500</span>
+                <span>{SITE_INFO.deliveryInfo.freeDeliveryText}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Phone size={16} className="text-[#C4818A]" />
-                <span>01712-012737</span>
+                <span>{SITE_INFO.phone}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <MapPin size={16} className="text-[#C4818A]" />
-                <span>All 64 districts of Bangladesh</span>
+                <span>All {SITE_INFO.deliveryInfo.deliveryDistricts} districts of Bangladesh</span>
               </div>
             </div>
           </div>

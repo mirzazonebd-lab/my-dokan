@@ -43,13 +43,15 @@ export default function AccountLayout({
     if (!authLoading && !user) {
       router.push('/auth/signin?redirect=/account');
     }
-  }, [user, authLoading, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, authLoading]);
 
   useEffect(() => {
     if (profile?.dark_mode !== undefined) {
       setDarkMode(profile.dark_mode);
     }
-  }, [profile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.dark_mode]);
 
   const handleSignOut = async () => {
     await signOut();

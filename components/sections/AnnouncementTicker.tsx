@@ -1,15 +1,9 @@
-export default function AnnouncementTicker() {
-  const items = [
-    '🌸 Free delivery on orders over ৳1500',
-    '⚡ Flash Sale — up to 30% OFF on K-Beauty',
-    '✨ New arrivals from COSRX, Laneige & Klairs',
-    '🇰🇷 Authentic Korean skincare imported directly',
-    '💳 Pay with bKash, Nagad, or Cash on Delivery',
-    '🚚 Delivering to all 64 districts of Bangladesh',
-    '⭐ Rated 4.8/5 by 50,000+ happy customers',
-    '🎁 Buy 2 Get 1 Free on selected serums',
-  ];
+'use client';
 
+import { SITE_INFO } from '@/lib/config/site-info';
+
+export default function AnnouncementTicker() {
+  const items = SITE_INFO.announcements;
   const doubled = [...items, ...items];
 
   return (

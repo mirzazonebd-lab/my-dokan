@@ -8,6 +8,7 @@ function equal(a: string | null, b: string | undefined) {
 }
 
 export async function requireSmsAuthorization(request: Request) {
+  if (!process.env.SYSTEM_API_KEY) throw new Response(JSON.stringify({ error: 'Server configuration error' }), { status: 500 });
   const systemKey = request.headers.get('x-system-key');
   if (!equal(systemKey, process.env.SYSTEM_API_KEY)) throw new Response(JSON.stringify({ error: 'Unauthorized: Invalid system key' }), { status: 401 });
   const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');

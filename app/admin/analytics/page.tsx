@@ -5,6 +5,7 @@ import { TrendingUp, DollarSign, ShoppingCart, Users, Eye, ChartBar as BarChart3
 import { DEMO_ANALYTICS, DEMO_ORDERS } from '@/lib/demo-data';
 import AdminLayout from '../AdminShell';
 import { products } from '@/lib/data/products';
+import Image from 'next/image';
 
 function StatCard({ label, value, change, icon }: { label: string; value: string; change?: string; icon: React.ReactNode }) {
   return (
@@ -148,8 +149,8 @@ export default function AdminAnalyticsPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {topProducts.map(product => (
               <div key={product.id} className="text-center">
-                <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 mb-2">
-                  <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 mb-2 relative">
+                  <Image src={product.image} alt={product.name} fill sizes="150px" className="object-cover" />
                 </div>
                 <p className="text-sm font-medium line-clamp-1">{product.name}</p>
                 <p className="text-xs text-[#C4818A]">{product.rating} ★</p>
