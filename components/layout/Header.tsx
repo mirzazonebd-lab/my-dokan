@@ -141,7 +141,7 @@ export default function Header() {
             </span>
             <span className="flex items-center gap-1.5">
               <Phone size={12} className="text-pink-400" />
-              01712-012737
+              +8809638758429
             </span>
           </div>
         </div>
@@ -363,11 +363,11 @@ export default function Header() {
             <div className="p-4 border-t border-rose-100 space-y-3">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Truck size={16} className="text-[#C4818A]" />
-                <span>Free delivery over ৳1500</span>
+                <span>Free delivery over ৳2026</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Phone size={16} className="text-[#C4818A]" />
-                <span>01712-012737</span>
+                <span>+8809638758429</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <MapPin size={16} className="text-[#C4818A]" />
