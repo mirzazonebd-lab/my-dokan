@@ -357,7 +357,7 @@ function CheckoutContent() {
 
   useEffect(() => { setMounted(true); }, []);
 
-  const tryHydrateFromUrl = async () => {
+  const tryHydrateFromUrl = useCallback(async () => {
     try {
       if (!mounted) return;
       if (hasHydratedFromUrl) return;
@@ -378,7 +378,7 @@ function CheckoutContent() {
     } catch (err) {
       // ignore fallback failures
     }
-  };
+  }, [mounted, hasHydratedFromUrl, items.length, searchParams, router]);
 
   useEffect(() => {
     let cancelled = false;
@@ -395,7 +395,8 @@ function CheckoutContent() {
     else setUrlHydrationInProgress(false);
 
     return () => { cancelled = true; };
-  }, [mounted, searchParams, addItem]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted, tryHydrateFromUrl]);
 
   useEffect(() => {
     if (mounted && !cartLoading && !urlHydrationInProgress && items.length === 0 && step !== 'review') router.push('/shop');

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -55,7 +55,7 @@ export default function AdminProductsPage() {
   const [brands, setBrands] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
 
-  const defaultForm = {
+  const [formData, setFormData] = useState({
     name: '',
     price: '',
     stock: '',
@@ -63,8 +63,17 @@ export default function AdminProductsPage() {
     category: '',
     brand: '',
     image: '',
-  };
-  const [formData, setFormData] = useState(defaultForm);
+  });
+
+  const defaultForm = useMemo(() => ({
+    name: '',
+    price: '',
+    stock: '',
+    description: '',
+    category: '',
+    brand: '',
+    image: '',
+  }), []);
 
   // Load products on mount
   useEffect(() => {
@@ -106,6 +115,7 @@ export default function AdminProductsPage() {
       setEditingProduct(null);
       setFormData(defaultForm);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSheetOpen]);
 
   const filteredProducts = useMemo(
