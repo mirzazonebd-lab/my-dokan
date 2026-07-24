@@ -378,7 +378,8 @@ function CheckoutContent() {
   }, [mounted, cartLoading, urlHydrationInProgress, items.length, step, router]);
 
   const shippingCost = ship.district ? (subtotal >= settings.freeShippingThreshold ? 0 : calcShipping(ship.district, settings)) : settings.deliveryCharge;
-  const grandTotal = subtotal + shippingCost - discount;
+  const grandTotal   = subtotal + shippingCost - discount;
+  const thanas       = getThanas(ship.district);
 
   // ── Coupon ──
   const applyCoupon = useCallback(() => {
@@ -683,16 +684,17 @@ function CheckoutContent() {
                       <datalist id="district-options">{BANGLADESH_DISTRICTS.map(d => <option key={d} value={d} />)}</datalist>
                     </Field>
 
-                    <Field label="Thana / Upazila" required error={shipErrors.thana}>
-                      <Input
-                        type="text"
-                        value={ship.thana}
-                        onChange={e => setShip(p => ({ ...p, thana: e.target.value }))}
-                        placeholder="Enter your Thana / Upazila"
-                        className={shipErrors.thana ? 'border-red-400' : ''}
-                      />
-                    </Field>
-                  </div>
+                      <Field label="Thana / Upazila" required error={shipErrors.thana}>
+                        <Input
+                          value={ship.thana}
+                          list="thana-options"
+                          onChange={e => setShip(p => ({ ...p, thana: e.target.value }))}
+                          placeholder="Search Thana / Upazila"
+                          className={shipErrors.thana ? 'border-red-400' : ''}
+                        />
+                        <datalist id="thana-options">{thanas.map(thana => <option key={thana} value={thana} />)}</datalist>
+                      </Field>
+                    </div>
 
                   {/* Delivery charge display */}
                   <div className={`rounded-xl p-4 flex items-center gap-3 ${isDhaka(ship.district) ? 'bg-blue-50 border border-blue-100' : 'bg-orange-50 border border-orange-100'
