@@ -1,4 +1,7 @@
+'use client';
+
 import { ShieldCheck, Truck, CreditCard, MapPin, RefreshCcw } from 'lucide-react';
+import { SITE_INFO } from '@/lib/config/site-info';
 
 const badges = [
   {
@@ -9,17 +12,17 @@ const badges = [
   {
     icon: Truck,
     title: 'Pan-Bangladesh Delivery',
-    description: 'We deliver to all 64 districts',
+    description: `We deliver to all ${SITE_INFO.deliveryInfo.deliveryDistricts} districts`,
   },
   {
     icon: CreditCard,
     title: 'Flexible Payment',
-    description: 'bKash, Nagad, Card, or Cash on Delivery',
+    description: SITE_INFO.paymentMethodsText,
   },
   {
     icon: MapPin,
     title: 'Fast Shipping',
-    description: 'Dhaka 1-2 days, Outside 3-5 days',
+    description: `Dhaka ${SITE_INFO.deliveryInfo.dhakaDelivery}, Outside ${SITE_INFO.deliveryInfo.outsideDhakaDelivery}`,
   },
   {
     icon: RefreshCcw,

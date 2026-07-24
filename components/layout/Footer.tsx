@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -8,6 +10,7 @@ import {
   Instagram,
   Youtube,
 } from 'lucide-react';
+import { SITE_INFO } from '@/lib/config/site-info';
 
 const shopLinks = [
   { label: 'All Products', href: '/shop' },
@@ -42,24 +45,24 @@ export default function Footer() {
                 <Image src="/logo65 copy.png" alt="Beauty Dokan BD" fill className="object-contain" />
               </div>
               <span className="font-poppins font-bold text-lg text-white">
-                Beauty Dokan <span className="text-[#E8A0AA]">BD</span>
+                {SITE_INFO.name.split(' ').slice(0, 2).join(' ')} <span className="text-[#E8A0AA]">BD</span>
               </span>
             </Link>
             <p className="text-sm text-gray-400 leading-relaxed mb-6">
-              Bangladesh&apos;s trusted destination for authentic Korean skincare and global beauty brands.
+              {SITE_INFO.description}
             </p>
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm text-gray-400">
                 <MapPin size={14} className="text-[#E8A0AA]" />
-                <span>Dhaka, Bangladesh</span>
+                <span>{SITE_INFO.location}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-400">
                 <Phone size={14} className="text-[#E8A0AA]" />
-                <span>+8809638758429</span>
+                <span>{SITE_INFO.phone}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-400">
                 <Mail size={14} className="text-[#E8A0AA]" />
-                <span>info@beautydokan.com</span>
+                <span>{SITE_INFO.email}</span>
               </div>
             </div>
           </div>
@@ -115,9 +118,9 @@ export default function Footer() {
             </ul>
             <div className="flex items-center gap-3 mt-6">
               {[
-                { icon: Facebook, href: '#', label: 'Facebook' },
-                { icon: Instagram, href: '#', label: 'Instagram' },
-                { icon: Youtube, href: '#', label: 'YouTube' },
+                { icon: Facebook, href: SITE_INFO.social.facebook, label: 'Facebook' },
+                { icon: Instagram, href: SITE_INFO.social.instagram, label: 'Instagram' },
+                { icon: Youtube, href: SITE_INFO.social.youtube, label: 'YouTube' },
               ].map(({ icon: Icon, href, label }) => (
                 <Link
                   key={label}
@@ -137,7 +140,7 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
-            <p>© {new Date().getFullYear()} Beauty Dokan BD. All rights reserved.</p>
+            <p>© {SITE_INFO.copyrightYear} {SITE_INFO.name}. All rights reserved.</p>
             <div className="flex items-center gap-6">
               <Link href="/privacy" className="hover:text-[#E8A0AA] transition-colors">
                 Privacy
