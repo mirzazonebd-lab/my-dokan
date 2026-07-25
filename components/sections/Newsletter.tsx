@@ -19,7 +19,7 @@ export default function Newsletter() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="font-poppins text-2xl sm:text-3xl font-bold text-white mb-3">
-            Get 10% Off Your First Order
+            Get 26% Off Your First Order
           </h2>
           <p className="text-white/60 mb-8">
             Subscribe for exclusive deals, new arrivals, and beauty tips

@@ -120,7 +120,7 @@ export default function LegalLayout({
               Message on Facebook
             </Link>
             <a
-              href="mailto:support@beautydokanbd.com"
+              href="mailto:info@beautydokanbd.com"
               className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
             >
               Email Support
