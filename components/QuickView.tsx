@@ -185,7 +185,7 @@ export default function QuickView({ product, open, onOpenChange }: QuickViewProp
             <div className="mt-6 pt-6 border-t border-gray-100 space-y-3">
               <div className="flex items-center gap-3 text-sm text-gray-600">
                 <Truck size={18} className="text-green-600" />
-                <span>Free delivery on orders over ৳1,500</span>
+                <span>Free delivery on orders over ৳2,026</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-gray-600">
                 <Shield size={18} className="text-blue-600" />

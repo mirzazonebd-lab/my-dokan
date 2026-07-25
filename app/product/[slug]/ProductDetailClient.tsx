@@ -380,9 +380,9 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
             {/* Delivery Info */}
             <div className="space-y-2">
               {[
-                { icon: Truck, text: 'Free delivery on orders over ৳1500', sub: 'Standard delivery: 2–4 business days', color: 'text-blue-500 bg-blue-50' },
-                { icon: MapPin, text: 'Delivery to all 64 districts', sub: 'Express delivery available in Dhaka', color: 'text-[#C4818A] bg-rose-50' },
-                { icon: Clock, text: 'Order before 3 PM for same-day dispatch', sub: 'Weekdays only', color: 'text-green-500 bg-green-50' },
+                { icon: Truck, text: 'Free delivery on orders over ৳2026', sub: 'Standard delivery: 2 to 4 business days', color: 'text-blue-500 bg-blue-50' },
+                { icon: MapPin, text: 'Delivery to all 64 districts', sub: 'Express delivery available in Anywhere in Bangladesh', color: 'text-[#C4818A] bg-rose-50' },
+                { icon: Clock, text: 'Order before 6 PM for same-day dispatch', sub: 'Weekdays only', color: 'text-green-500 bg-green-50' },
                 { icon: RefreshCw, text: '7-Day Easy Return Policy', sub: 'Hassle-free returns & refunds', color: 'text-purple-500 bg-purple-50' },
                 { icon: Shield, text: '100% Authentic Products Guaranteed', sub: 'Direct from authorized distributors', color: 'text-amber-500 bg-amber-50' },
               ].map(({ icon: Icon, text, sub, color }) => (

@@ -127,7 +127,7 @@ export default function Header() {
           <div className="flex items-center gap-6">
             <span className="flex items-center gap-1.5">
               <Truck size={12} className="text-pink-400" />
-              Free delivery on orders over ৳1500
+              Free delivery on orders over ৳2026
             </span>
             <span className="flex items-center gap-1.5">
               <MapPin size={12} className="text-pink-400" />

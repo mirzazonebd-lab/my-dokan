@@ -110,7 +110,7 @@ function CartPageContent() {
 
               <div className="bg-white rounded-3xl border border-gray-100 p-6">
                 <h2 className="text-base font-semibold text-gray-900 mb-4">Need help?</h2>
-                <p className="text-sm text-gray-500">If you have questions about your order, please contact our support team at 01712-012737.</p>
+                <p className="text-sm text-gray-500">If you have questions or inquiries about your order, please contact our support team at +8809638758429.</p>
               </div>
             </section>
 
