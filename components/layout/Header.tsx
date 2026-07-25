@@ -137,7 +137,7 @@ export default function Header() {
           <div className="flex items-center gap-6">
             <span className="flex items-center gap-1.5">
               <Star size={12} className="text-yellow-400 fill-yellow-400" />
-              4.8/5 from 10,000+ customers
+              4.8/5 from  customers
             </span>
             <span className="flex items-center gap-1.5">
               <Phone size={12} className="text-pink-400" />

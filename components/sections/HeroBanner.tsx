@@ -8,8 +8,8 @@ import { ArrowRight, Sparkles, Star } from 'lucide-react';
 const slides = [
   {
     id: 1,
-    badge: 'Your Trusted Destination',
-    headline: 'Premium Beauty Products',
+    badge: 'Your Trusted Bangladeshi Destination',
+    headline: 'Premium Beauty care Products',
     subheadline: 'Discover authentic global skincare, makeup, hair care, body care and men\'s grooming products—all in one place.',
     cta1: { label: 'Shop Now', href: '/shop' },
     cta2: { label: 'Explore Brands', href: '/brands' },
@@ -43,7 +43,7 @@ const slides = [
 
 const TRUST_PILLS = [
   { icon: '✓', text: '100% Authentic' },
-  { icon: '🚚', text: 'Free Delivery ৳1500+' },
+  { icon: '🚚', text: 'Free Delivery ৳2026+' },
   { icon: '⭐', text: '10,000+ Happy Customers' },
 ];
 

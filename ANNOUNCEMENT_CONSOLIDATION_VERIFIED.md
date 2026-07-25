@@ -127,7 +127,7 @@ export const SITE_INFO = {
 - **Strings found:**
   - "Free delivery on orders over" - FOUND in Header & Ticker
   - "Delivering to all 64 districts" - FOUND in Header & TrustBadges
-  - "10,000+ customers" - FOUND in Header (changed to 19,000+)
+  - " customers" - FOUND in Header (changed to 19,000+)
   - "01712-012737" - NOT FOUND (different phone format)
   - "4.8/5" - FOUND in Header & Ticker
 
@@ -215,7 +215,7 @@ export const SITE_INFO = {
 ### Before Changes
 - ❌ Phone: Multiple formats (+8809638758429, 01712-012737)
 - ❌ Delivery threshold: Multiple values (1500, 2026)
-- ❌ Review count: Multiple values (10,000+, 19,000+)
+- ❌ Review count: Multiple values (, 19,000+)
 - ❌ Text scattered across components
 
 ### After Changes

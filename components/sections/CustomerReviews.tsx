@@ -26,7 +26,7 @@ export default function CustomerReviews() {
                 <Star key={i} size={18} className="text-yellow-400 fill-yellow-400" />
               ))}
             </div>
-            <span className="text-gray-500 text-sm">4.8 from 10,000+ reviews</span>
+            <span className="text-gray-500 text-sm">4.8 from  reviews</span>
           </div>
         </div>
 
