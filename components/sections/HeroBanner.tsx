@@ -26,7 +26,7 @@ const slides = [
     cta2: { label: 'View All', href: '/shop' },
     // Elegant Korean skincare bottles, serums, pastel tones
     image: 'https://images.pexels.com/photos/3762879/pexels-photo-3762879.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop',
-    accent: '#C4818A',
+    accent: '#6fe8c8',
   },
   {
     id: 3,
@@ -37,7 +37,7 @@ const slides = [
     cta2: { label: 'Best Sellers', href: '/shop?filter=bestseller' },
     // Premium cosmetics flat-lay, marble, pastel pink and white
     image: 'https://images.pexels.com/photos/3997390/pexels-photo-3997390.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop',
-    accent: '#E8C88A',
+    accent: '#6876e2',
   },
 ];
 
