@@ -27,7 +27,7 @@ const SETTINGS_KEY = 'beautydokanbd_admin_settings';
 const DEFAULT_SETTINGS = {
   storeName: 'Beauty Dokan BD',
   storeEmail: 'info@beautydokan.com',
-  storePhone: '+8801712012737',
+  storePhone: '+8809638758429',
   freeShippingThreshold: 2026,
   deliveryCharge: 60,
   codEnabled: true,

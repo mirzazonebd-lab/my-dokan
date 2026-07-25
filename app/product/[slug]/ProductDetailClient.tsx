@@ -147,7 +147,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
     return () => observer.disconnect();
   }, []);
 
-  const { addItem } = useCart();
+  const { addItem, clearCart } = useCart();
   const router = useRouter();
 
   const handleAddToCart = async () => {
