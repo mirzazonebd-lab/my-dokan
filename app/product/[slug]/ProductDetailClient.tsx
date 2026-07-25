@@ -288,7 +288,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                   You save ৳{savings.toLocaleString()} on this purchase
                 </p>
               )}
-              <p className="text-xs text-gray-500 mt-1">Inclusive of all taxes. Free shipping over ৳1500.</p>
+              <p className="text-xs text-gray-500 mt-1">Inclusive of all taxes. Free shipping over ৳2026.</p>
             </div>
 
             {/* Skin Type */}
