@@ -14,6 +14,13 @@
 		"ghcr.io/wxw-matt/devcontainer-features/command_runner:0": {},
 		"ghcr.io/devcontainer-config/features/dot-config:4": {},
 		"ghcr.io/postfinance/devcontainer-features/dotnet:1": {}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"hostinger-official.hostinger-connector"
+			]
+		}
 	}
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
