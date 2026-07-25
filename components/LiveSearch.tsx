@@ -7,7 +7,7 @@ import { Search, X, Clock, TrendingUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { products } from '@/lib/data/products';
 import { categories } from '@/lib/data/categories';
-import { brands } from '@/lib/data/brands';
+import { brands } from '@/middleware';
 
 interface LiveSearchProps {
   isOpen: boolean;

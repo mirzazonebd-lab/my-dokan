@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Filter, SlidersHorizontal, Grid3x3 as Grid3X3, List, ChevronDown, ChevronRight, X, Star, Package, Sparkles, Tag, Percent } from 'lucide-react';
 import { Category, Product } from '@/lib/data/types';
-import { brands } from '@/lib/data/brands';
+import { brands } from '@/middleware';
 import ProductCard from '@/components/ui/ProductCard';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -204,11 +204,10 @@ export default function CategoryClient({ category, products: initialProducts }: 
                           setMinRating(minRating === rating ? 0 : rating);
                           setCurrentPage(1);
                         }}
-                        className={`flex items-center gap-1 px-2 py-1 rounded-lg text-sm transition-colors ${
-                          minRating === rating
+                        className={`flex items-center gap-1 px-2 py-1 rounded-lg text-sm transition-colors ${minRating === rating
                             ? 'bg-[#C4818A] text-white'
                             : 'bg-gray-100 hover:bg-rose-100'
-                        }`}
+                          }`}
                       >
                         <Star size={12} className={minRating === rating ? 'fill-white text-white' : 'fill-yellow-400 text-yellow-400'} />
                         {rating}+
@@ -326,17 +325,15 @@ export default function CategoryClient({ category, products: initialProducts }: 
                 <div className="hidden md:flex items-center bg-gray-100 rounded-lg p-1">
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`p-2 rounded-md transition-colors ${
-                      viewMode === 'grid' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
-                    }`}
+                    className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
+                      }`}
                   >
                     <Grid3X3 size={16} />
                   </button>
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`p-2 rounded-md transition-colors ${
-                      viewMode === 'list' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
-                    }`}
+                    className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
+                      }`}
                   >
                     <List size={16} />
                   </button>
@@ -396,11 +393,10 @@ export default function CategoryClient({ category, products: initialProducts }: 
                       <button
                         key={pageNum}
                         onClick={() => setCurrentPage(pageNum)}
-                        className={`w-10 h-10 rounded-lg font-medium transition-colors ${
-                          currentPage === pageNum
+                        className={`w-10 h-10 rounded-lg font-medium transition-colors ${currentPage === pageNum
                             ? 'bg-[#C4818A] text-white'
                             : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-200'
-                        }`}
+                          }`}
                       >
                         {pageNum}
                       </button>

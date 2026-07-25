@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, ExternalLink } from 'lucide-react';
-import { getFeaturedBrands } from '@/lib/data/brands';
+import { getFeaturedBrands } from '@/middleware';
 
 const brandColors: Record<string, string> = {
   COSRX: 'from-sky-50 to-blue-50',

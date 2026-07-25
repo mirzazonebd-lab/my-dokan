@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import ClientWrapper from '@/components/ClientWrapper';
-import { brands, getKoreanBrands, getInternationalBrands } from '@/lib/data/brands';
+import { brands, getKoreanBrands, getInternationalBrands } from '@/middleware';
 import BrandsClient from './BrandsClient';
 
 export const metadata: Metadata = {

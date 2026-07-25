@@ -4,11 +4,20 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 
 const TYPES = new Set(['ORDER_CONFIRMATION', 'PAYMENT_SUCCESS', 'SHIPMENT', 'DELIVERY']);
 export const maskPhoneNumber = (phone: string) => `${phone.slice(0, 4)}XXXXX${phone.slice(-4)}`;
-const normalizePhone = (phone: string) => /^01\d{9}$/.test(phone) ? `+88${phone}` : /^\+8801\d{9}$/.test(phone) ? phone : (() => { throw new Error('Invalid customer phone number'); })();
+
+const normalizePhone = (phone: string) => {
+  if (/^01\d{9}$/.test(phone)) return `+88${phone}`;
+  if (/^\+8801\d{9}$/.test(phone)) return phone;
+  throw new Error('Invalid customer phone number');
+};
+
 const render = (template: string, values: Record<string, string>) => template.replace(/\{(\w+)\}/g, (_, key) => values[key] || '');
 
 export async function queueOrderSms(orderId: string, templateKey: string, userId: string) {
   if (!TYPES.has(templateKey)) throw new Error('Invalid template key');
+  
+  if (!process.env.NEXTAUTH_URL) throw new Error('NEXTAUTH_URL not configured');
+  
   const { data: order, error: orderError } = await supabaseAdmin.from('orders').select('id,order_number,total,tracking_url,shipping_address').eq('id', orderId).single();
   if (orderError || !order) throw new Error('Order not found');
   const { count } = await supabaseAdmin.from('sms_queue').select('*', { count: 'exact', head: true }).eq('order_id', orderId).gte('created_at', new Date(Date.now() - 60000).toISOString());
@@ -24,7 +33,8 @@ export async function queueOrderSms(orderId: string, templateKey: string, userId
   if (queueError) throw queueError;
   const client = twilio(process.env.TWILIO_ACCOUNT_SID!, process.env.TWILIO_AUTH_TOKEN!);
   try {
-    const response = await client.messages.create({ to: phone, from: process.env.TWILIO_PHONE_NUMBER!, body: message, statusCallback: `${process.env.NEXTAUTH_URL}/api/sms/webhook?log=${log.id}` });
+    const callbackUrl = new URL(`/api/sms/webhook?log=${encodeURIComponent(log.id)}`, process.env.NEXTAUTH_URL).toString();
+    const response = await client.messages.create({ to: phone, from: process.env.TWILIO_PHONE_NUMBER!, body: message, statusCallback: callbackUrl });
     await supabaseAdmin.from('sms_logs').update({ status: 'sent', provider_response: { sid: response.sid, status: response.status } }).eq('id', log.id);
     await supabaseAdmin.from('sms_queue').update({ status: 'sent' }).eq('sms_log_id', log.id);
   } catch {

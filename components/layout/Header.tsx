@@ -27,7 +27,7 @@ const navItems = [
     mega: true,
     columns: [
       {
-        title: 'Skincare',
+        title: 'Beauty Skincare',
         links: [
           { label: 'All Skincare', href: '/category/skincare' },
           { label: 'Korean Skincare', href: '/category/korean-skincare' },
@@ -141,7 +141,7 @@ export default function Header() {
             </span>
             <span className="flex items-center gap-1.5">
               <Phone size={12} className="text-pink-400" />
-              01712-012737
+              +8809638758429
             </span>
           </div>
         </div>
@@ -149,11 +149,10 @@ export default function Header() {
 
       {/* Main Header */}
       <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? 'bg-white/95 backdrop-blur-xl shadow-luxury border-b border-rose-100'
-            : 'bg-white border-b border-rose-100'
-        }`}
+        className={`sticky top-0 z-50 transition-all duration-300 ${scrolled
+          ? 'bg-white/95 backdrop-blur-xl shadow-luxury border-b border-rose-100'
+          : 'bg-white border-b border-rose-100'
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16 md:h-20">
@@ -187,11 +186,10 @@ export default function Header() {
                 >
                   <Link
                     href={item.href}
-                    className={`flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      megaOpen === item.label
-                        ? 'text-[#C4818A] bg-rose-50'
-                        : 'text-gray-700 hover:text-[#C4818A] hover:bg-rose-50'
-                    }`}
+                    className={`flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${megaOpen === item.label
+                      ? 'text-[#C4818A] bg-rose-50'
+                      : 'text-gray-700 hover:text-[#C4818A] hover:bg-rose-50'
+                      }`}
                   >
                     {item.label}
                     {item.mega && (
@@ -210,9 +208,8 @@ export default function Header() {
                     >
                       {item.columns?.map((col) => (
                         <div key={col.title}>
-                          <h3 className={`text-xs font-semibold uppercase tracking-widest mb-3 ${
-                            col.featured ? 'text-[#C4818A]' : 'text-gray-400'
-                          }`}>
+                          <h3 className={`text-xs font-semibold uppercase tracking-widest mb-3 ${col.featured ? 'text-[#C4818A]' : 'text-gray-400'
+                            }`}>
                             {col.title}
                           </h3>
                           <ul className="space-y-1.5">
@@ -363,11 +360,11 @@ export default function Header() {
             <div className="p-4 border-t border-rose-100 space-y-3">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Truck size={16} className="text-[#C4818A]" />
-                <span>Free delivery over ৳1500</span>
+                <span>Free delivery over ৳2026</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Phone size={16} className="text-[#C4818A]" />
-                <span>01712-012737</span>
+                <span>+8809638758429</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <MapPin size={16} className="text-[#C4818A]" />

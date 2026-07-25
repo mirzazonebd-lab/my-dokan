@@ -3,8 +3,14 @@
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { CartItem, Address } from '@/lib/demo-data';
 import { Product } from '@/lib/data/types';
+import { getProducts, updateProduct } from '@/lib/data/products';
 
-interface CartItemWithProduct extends CartItem {
+interface CartItemWithProduct {
+  id: string;
+  user_id: string;
+  quantity: number;
+  created_at: string;
+  updated_at: string;
   product: Product;
 }
 
@@ -15,6 +21,7 @@ interface CartContextType {
   removeItem: (productId: string) => Promise<void>;
   updateQuantity: (productId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
+  checkoutCart: () => Promise<void>; // Decreases inventory
   itemCount: number;
   subtotal: number;
   shipping: number;
@@ -31,17 +38,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItemWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Dynamic import for products
-  const getProducts = useCallback(async () => {
-    const { products } = await import('@/lib/data/products');
-    return products;
-  }, []);
-
   // Load cart from localStorage
   useEffect(() => {
     const loadCart = async () => {
       setLoading(true);
-
       try {
         const savedCart = localStorage.getItem(CART_STORAGE_KEY);
         if (savedCart) {
@@ -54,7 +54,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
               return {
                 id: item.productId,
                 user_id: 'guest',
-                product_id: item.productId,
                 quantity: item.quantity,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
@@ -65,22 +64,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
           setItems(itemsWithProducts);
         }
-      } catch {
+      } catch (error) {
+        console.error('Error loading cart:', error);
         localStorage.removeItem(CART_STORAGE_KEY);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     loadCart();
-  }, [getProducts]);
-
-  
+  }, []);
 
   // Save cart to localStorage whenever items change
   useEffect(() => {
     if (!loading) {
       const cartData = items.map(item => ({
-        productId: item.product_id,
+        productId: item.product.id,
         quantity: item.quantity,
       }));
       localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartData));
@@ -89,11 +88,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = async (product: Product, quantity: number = 1) => {
     setItems(prev => {
-      const existing = prev.find(item => item.product_id === product.id);
+      const existing = prev.find(item => item.product.id === product.id);
 
       if (existing) {
         return prev.map(item =>
-          item.product_id === product.id
+          item.product.id === product.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
@@ -102,7 +101,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const newItem: CartItemWithProduct = {
         id: product.id,
         user_id: 'guest',
-        product_id: product.id,
         quantity,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -114,7 +112,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const removeItem = async (productId: string) => {
-    setItems(prev => prev.filter(item => item.product_id !== productId));
+    setItems(prev => prev.filter(item => item.product.id !== productId));
   };
 
   const updateQuantity = async (productId: string, quantity: number) => {
@@ -125,7 +123,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     setItems(prev =>
       prev.map(item =>
-        item.product_id === productId ? { ...item, quantity } : item
+        item.product.id === productId ? { ...item, quantity } : item
       )
     );
   };
@@ -133,6 +131,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const clearCart = async () => {
     setItems([]);
     localStorage.removeItem(CART_STORAGE_KEY);
+  };
+
+  // Decrease inventory for all items in cart (called on checkout success)
+  const checkoutCart = async () => {
+    try {
+      for (const item of items) {
+        const newStock = Math.max(0, item.product.stock - item.quantity);
+        await updateProduct(item.product.id, { stock: newStock });
+      }
+      await clearCart();
+    } catch (error) {
+      console.error('Error during checkout:', error);
+    }
   };
 
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
@@ -148,6 +159,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem,
       updateQuantity,
       clearCart,
+      checkoutCart,
       itemCount,
       subtotal,
       shipping,
@@ -169,6 +181,7 @@ export function useCart() {
       removeItem: async () => {},
       updateQuantity: async () => {},
       clearCart: async () => {},
+      checkoutCart: async () => {},
       itemCount: 0,
       subtotal: 0,
       shipping: 0,

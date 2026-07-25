@@ -4,15 +4,19 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Lock, Mail, Zap } from 'lucide-react';
-import { supabase } from '@/lib/supabase/client';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const { signIn } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const ADMIN_EMAIL = 'beautydokanbd@gmail.com';
+  const ADMIN_PASSWORD = '@Araf@2024@';
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -20,18 +24,29 @@ export default function AdminLoginPage() {
     setLoading(true);
     setError('');
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    setLoading(false);
-
-    if (error) {
-      setError(error.message);
+    // Verify credentials match exactly
+    if (email.trim() !== ADMIN_EMAIL) {
+      setError('Invalid email or password.');
+      setLoading(false);
       return;
     }
 
+    if (password !== ADMIN_PASSWORD) {
+      setError('Invalid email or password.');
+      setLoading(false);
+      return;
+    }
+
+    // Credentials valid - sign in
+    const { error } = await signIn(email, password);
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+
+    // Success - redirect
     router.push('/admin');
     router.refresh();
   };
@@ -71,7 +86,7 @@ export default function AdminLoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="admin@example.com"
+                  placeholder="beautydokanbd@gmail.com"
                   className="w-full pl-9 pr-3 py-2 text-sm text-gray-900 bg-transparent outline-none"
                 />
               </div>
@@ -119,15 +134,6 @@ export default function AdminLoginPage() {
             <p>
               Access the admin dashboard for managing products, orders,
               customers and store settings.
-            </p>
-
-            <p className="mt-4">
-              <Link
-                href="/admin"
-                className="font-semibold text-[#C4818A] hover:text-[#b06e77]"
-              >
-                Continue to dashboard
-              </Link>
             </p>
           </div>
         </div>

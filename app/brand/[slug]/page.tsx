@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import ClientWrapper from '@/components/ClientWrapper';
-import { brands } from '@/lib/data/brands';
+import { brands } from '@/middleware';
 import { products } from '@/lib/data/products';
 import BrandClient from './BrandClient';
 

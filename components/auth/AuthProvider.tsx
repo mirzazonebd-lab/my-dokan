@@ -1,7 +1,20 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { Profile, DEMO_USER } from '@/lib/demo-data';
+import { supabase } from '@/lib/supabase/client';
+import { supabaseAdmin } from '@/lib/supabase/server';
+
+export interface Profile {
+  id: string;
+  email: string;
+  full_name: string | null;
+  phone?: string | null;
+  role: 'admin' | 'customer';
+  dark_mode?: boolean;
+  email_notifications?: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 interface User {
   id: string;
@@ -11,7 +24,9 @@ interface User {
 interface AuthContextType {
   user: User | null;
   profile: Profile | null;
+  token: string | null;
   loading: boolean;
+  isAdmin: boolean;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -20,53 +35,152 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'beautydokanbd_auth';
+const STORAGE_KEY = 'beautydokanbd_auth_token';
 const PROFILE_KEY = 'beautydokanbd_profile';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const isAdmin = profile?.role === 'admin';
 
+  // Initialize auth state on mount
   useEffect(() => {
-    // Load auth state from localStorage
-    const storedAuth = localStorage.getItem(STORAGE_KEY);
-    const storedProfile = localStorage.getItem(PROFILE_KEY);
-
-    if (storedAuth) {
+    const initializeAuth = async () => {
       try {
-        const authData = JSON.parse(storedAuth);
-        setUser(authData.user);
-        setProfile(storedProfile ? JSON.parse(storedProfile) : { ...DEMO_USER, email: authData.user.email });
-      } catch {
-        localStorage.removeItem(STORAGE_KEY);
-        localStorage.removeItem(PROFILE_KEY);
-      }
-    }
+        // Check if user is already logged in with Supabase
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Auth error:', error);
+          setLoading(false);
+          return;
+        }
 
-    setLoading(false);
+        if (session?.user) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+          });
+          setToken(session.access_token);
+
+          // Fetch user profile
+          try {
+            const { data: profileData, error: profileError } = await supabaseAdmin
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+
+            if (profileError) {
+              console.warn('Profile not found:', profileError);
+              // Create default profile if it doesn't exist
+              const { data: newProfile } = await supabaseAdmin
+                .from('profiles')
+                .insert({
+                  id: session.user.id,
+                  email: session.user.email,
+                  full_name: session.user.user_metadata?.full_name || null,
+                  role: 'customer',
+                })
+                .select()
+                .single();
+
+              if (newProfile) {
+                setProfile(newProfile as Profile);
+              }
+            } else if (profileData) {
+              setProfile(profileData as Profile);
+            }
+          } catch (err) {
+            console.error('Error fetching profile:', err);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to initialize auth:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email || '',
+        });
+        setToken(session.access_token);
+
+        // Fetch updated profile
+        try {
+          const { data: profileData } = await supabaseAdmin
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profileData) {
+            setProfile(profileData as Profile);
+          }
+        } catch (err) {
+          console.error('Error fetching profile:', err);
+        }
+      } else {
+        setUser(null);
+        setProfile(null);
+        setToken(null);
+      }
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, fullName?: string) => {
     try {
-      // Demo signup - always succeeds
-      const newUser: User = {
-        id: `user-${Date.now()}`,
+      if (!email || !email.includes('@')) {
+        return { error: new Error('Invalid email format') };
+      }
+      if (!password || password.length < 6) {
+        return { error: new Error('Password must be at least 6 characters') };
+      }
+
+      const { data, error } = await supabase.auth.signUp({
         email,
-      };
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+        },
+      });
 
-      const newProfile: Profile = {
-        ...DEMO_USER,
-        id: newUser.id,
-        email,
-        full_name: fullName || null,
-      };
+      if (error) {
+        return { error };
+      }
 
-      setUser(newUser);
-      setProfile(newProfile);
+      if (data.user) {
+        setUser({
+          id: data.user.id,
+          email: data.user.email || '',
+        });
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: newUser }));
-      localStorage.setItem(PROFILE_KEY, JSON.stringify(newProfile));
+        // Profile will be auto-created by trigger
+        const newProfile: Profile = {
+          id: data.user.id,
+          email: data.user.email || '',
+          full_name: fullName || null,
+          role: 'customer',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        setProfile(newProfile);
+      }
 
       return { error: null };
     } catch (err) {
@@ -76,22 +190,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      // Demo signin - always succeeds with any credentials
-      const existingUser: User = {
-        id: DEMO_USER.id,
+      if (!email || !email.includes('@')) {
+        return { error: new Error('Invalid email format') };
+      }
+      if (!password) {
+        return { error: new Error('Password is required') };
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
-      };
+        password,
+      });
 
-      const existingProfile: Profile = {
-        ...DEMO_USER,
-        email,
-      };
+      if (error) {
+        return { error };
+      }
 
-      setUser(existingUser);
-      setProfile(existingProfile);
+      if (data.session?.user) {
+        setUser({
+          id: data.session.user.id,
+          email: data.session.user.email || '',
+        });
+        setToken(data.session.access_token);
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: existingUser }));
-      localStorage.setItem(PROFILE_KEY, JSON.stringify(existingProfile));
+        // Fetch user profile
+        try {
+          const { data: profileData } = await supabaseAdmin
+            .from('profiles')
+            .select('*')
+            .eq('id', data.session.user.id)
+            .single();
+
+          if (profileData) {
+            setProfile(profileData as Profile);
+          }
+        } catch (err) {
+          console.error('Error fetching profile:', err);
+        }
+      }
 
       return { error: null };
     } catch (err) {
@@ -100,19 +236,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    setUser(null);
-    setProfile(null);
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(PROFILE_KEY);
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setProfile(null);
+      setToken(null);
+    } catch (err) {
+      console.error('Error signing out:', err);
+    }
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) return { error: new Error('Not authenticated') };
 
     try {
-      const updatedProfile = { ...profile, ...updates } as Profile;
-      setProfile(updatedProfile);
-      localStorage.setItem(PROFILE_KEY, JSON.stringify(updatedProfile));
+      // Filter out fields that shouldn't be sent to the database
+      const allowedFields = ['full_name', 'phone', 'dark_mode', 'email_notifications'] as const;
+      const filteredUpdates: Record<string, any> = {};
+      
+      for (const key in updates) {
+        if (allowedFields.includes(key as typeof allowedFields[number])) {
+          filteredUpdates[key] = updates[key as keyof Profile];
+        }
+      }
+
+      const { data, error } = await supabaseAdmin
+        .from('profiles')
+        .update(filteredUpdates)
+        .eq('id', user.id)
+        .select()
+        .single();
+
+      if (error) {
+        return { error };
+      }
+
+      if (data) {
+        setProfile(data as Profile);
+      }
+
       return { error: null };
     } catch (err) {
       return { error: err as Error };
@@ -123,7 +285,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={{
       user,
       profile,
+      token,
       loading,
+      isAdmin,
       signUp,
       signIn,
       signOut,
@@ -136,16 +300,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  // During SSR, context will be undefined - return a default safe state
   if (context === undefined) {
     return {
       user: null,
       profile: null,
+      token: null,
       loading: true,
-      signUp: async () => ({ error: null }),
-      signIn: async () => ({ error: null }),
+      isAdmin: false,
+      signUp: async () => ({ error: new Error('Auth context not available') }),
+      signIn: async () => ({ error: new Error('Auth context not available') }),
       signOut: async () => {},
-      updateProfile: async () => ({ error: null }),
+      updateProfile: async () => ({ error: new Error('Auth context not available') }),
     };
   }
   return context;
