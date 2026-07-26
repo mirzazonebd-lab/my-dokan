@@ -75,7 +75,7 @@ export default function AdminAnalyticsPage() {
     ]);
 
     // Top products by rating
-    const topRated = [...products].sort((a, b) => b.rating - a.rating).slice(0, 5);
+    const topRated = [...products].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)).slice(0, 5);
     setTopProducts(topRated);
   }, []);
 
@@ -150,7 +150,7 @@ export default function AdminAnalyticsPage() {
             {topProducts.map(product => (
               <div key={product.id} className="text-center">
                 <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 mb-2 relative">
-                  <Image src={product.image} alt={product.name} fill sizes="150px" className="object-cover" />
+                  <Image src={product.image || '/placeholder.png'} alt={product.name} fill sizes="150px" className="object-cover" />
                 </div>
                 <p className="text-sm font-medium line-clamp-1">{product.name}</p>
                 <p className="text-xs text-[#C4818A]">{product.rating} ★</p>

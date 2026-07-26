@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { MapPin, Plus, Pencil, Trash2, Check } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { Address, BANGLADESH_DISTRICTS, DEMO_ADDRESSES } from '@/lib/demo-data';
+import { Address, BANGLADESH_DISTRICTS } from '@/lib/demo-data';
+import { DEMO_ADDRESSES } from "@/lib/data/types";
 import AccountLayout from '../AccountShell';
 import ClientWrapper from '@/components/ClientWrapper';
 import { Button } from '@/components/ui/button';

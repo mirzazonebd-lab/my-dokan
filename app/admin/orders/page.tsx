@@ -97,7 +97,7 @@ CUSTOMER INFORMATION
 ───────────────────────────────────────────
 Name: ${order.shipping_address?.name || 'N/A'}
 Phone: ${order.shipping_address?.phone || 'N/A'}
-Email: ${order.shipping_address?.email || 'N/A'}
+Email: N/A
 Address: ${order.shipping_address?.address || 'N/A'}
 City: ${order.shipping_address?.city || 'N/A'}
 District: ${order.shipping_address?.district || 'N/A'}
@@ -198,7 +198,7 @@ Downloaded on: ${new Date().toLocaleString()}
         </div>
         <div class="summary-row">
             <span>Email:</span>
-            <strong>${order.shipping_address?.email || 'N/A'}</strong>
+            <strong>N/A</strong>
         </div>
         <div class="summary-row">
             <span>Address:</span>

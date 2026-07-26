@@ -87,7 +87,7 @@ export default function WishlistPage() {
                 <Link href={`/product/${item.product_id}`}>
                   <div className="relative aspect-square bg-rose-50">
                     <Image
-                      src={item.product.image}
+                      src={item.product.image || '/placeholder.png'}
                       alt={item.product.name}
                       fill
                       className="object-cover"

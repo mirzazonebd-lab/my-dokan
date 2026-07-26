@@ -1,0 +1,241 @@
+app/account/wishlist/page.tsx(90,23): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+app/admin/analytics/page.tsx(78,51): error TS18048: 'b.rating' is possibly 'undefined'.
+app/admin/analytics/page.tsx(78,62): error TS18048: 'a.rating' is possibly 'undefined'.
+app/admin/analytics/page.tsx(153,26): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+app/admin/orders/page.tsx(100,34): error TS2339: Property 'email' does not exist on type 'Address'.
+app/admin/orders/page.tsx(201,47): error TS2339: Property 'email' does not exist on type 'Address'.
+app/admin/products/add/page.tsx(26,25): error TS7006: Parameter 'e' implicitly has an 'any' type.
+app/admin/products/add/page.tsx(31,31): error TS7006: Parameter 'e' implicitly has an 'any' type.
+app/admin/products/page.tsx(50,11): error TS2304: Cannot find name 'editingProduct'.
+app/admin/products/page.tsx(57,40): error TS2304: Cannot find name 'token'.
+app/admin/products/page.tsx(60,17): error TS2304: Cannot find name 'editingProduct'.
+app/admin/products/page.tsx(62,21): error TS2552: Cannot find name 'formData'. Did you mean 'FormData'?
+app/admin/products/page.tsx(63,21): error TS2552: Cannot find name 'formData'. Did you mean 'FormData'?
+app/admin/products/page.tsx(64,29): error TS2552: Cannot find name 'formData'. Did you mean 'FormData'?
+app/admin/products/page.tsx(65,29): error TS2552: Cannot find name 'formData'. Did you mean 'FormData'?
+app/admin/products/page.tsx(66,28): error TS2552: Cannot find name 'formData'. Did you mean 'FormData'?
+app/admin/products/page.tsx(67,25): error TS2304: Cannot find name 'formData'.
+app/admin/products/page.tsx(68,22): error TS2304: Cannot find name 'formData'.
+app/admin/products/page.tsx(69,22): error TS2304: Cannot find name 'formData'.
+app/admin/products/page.tsx(76,50): error TS2304: Cannot find name 'editingProduct'.
+app/admin/products/page.tsx(85,40): error TS2304: Cannot find name 'token'.
+app/admin/products/page.tsx(88,19): error TS2304: Cannot find name 'formData'.
+app/admin/products/page.tsx(89,19): error TS2304: Cannot find name 'formData'.
+app/admin/products/page.tsx(90,27): error TS2304: Cannot find name 'formData'.
+app/admin/products/page.tsx(91,27): error TS2304: Cannot find name 'formData'.
+app/admin/products/page.tsx(92,26): error TS2304: Cannot find name 'formData'.
+app/admin/products/page.tsx(93,23): error TS2304: Cannot find name 'formData'.
+app/admin/products/page.tsx(94,20): error TS2304: Cannot find name 'formData'.
+app/admin/products/page.tsx(95,20): error TS2304: Cannot find name 'formData'.
+app/admin/products/page.tsx(107,7): error TS2304: Cannot find name 'setIsSheetOpen'.
+app/admin/products/page.tsx(116,5): error TS2304: Cannot find name 'setEditingProduct'.
+app/admin/products/page.tsx(117,5): error TS2304: Cannot find name 'setFormData'.
+app/admin/products/page.tsx(126,5): error TS2304: Cannot find name 'setIsSheetOpen'.
+app/admin/products/page.tsx(136,40): error TS2304: Cannot find name 'token'.
+app/admin/products/page.tsx(156,7): error TS2304: Cannot find name 'setFormData'.
+app/admin/products/page.tsx(156,19): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+app/admin/products/page.tsx(208,33): error TS2322: Type 'string | null' is not assignable to type 'string | number | readonly string[] | undefined'.
+  Type 'null' is not assignable to type 'string | number | readonly string[] | undefined'.
+app/admin/products/page.tsx(221,35): error TS2322: Type 'string | null' is not assignable to type 'string | number | readonly string[] | undefined'.
+app/admin/products/page.tsx(253,33): error TS2304: Cannot find name 'toggleAll'.
+app/admin/products/page.tsx(280,34): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+app/admin/products/page.tsx(292,32): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+app/admin/products/page.tsx(293,85): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+app/api/admin/coupons/route.ts(14,35): error TS2552: Cannot find name 'request'. Did you mean 'Request'?
+app/brand/[slug]/BrandClient.tsx(47,61): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+app/brand/[slug]/BrandClient.tsx(55,35): error TS18048: 'p.rating' is possibly 'undefined'.
+app/brand/[slug]/BrandClient.tsx(70,37): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+app/brand/[slug]/BrandClient.tsx(70,58): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+app/brand/[slug]/BrandClient.tsx(82,31): error TS18048: 'b.rating' is possibly 'undefined'.
+app/brand/[slug]/BrandClient.tsx(82,42): error TS18048: 'a.rating' is possibly 'undefined'.
+app/brand/[slug]/BrandClient.tsx(122,49): error TS18048: 'p.rating' is possibly 'undefined'.
+app/brand/[slug]/BrandClient.tsx(124,65): error TS18048: 'p.totalReviews' is possibly 'undefined'.
+app/brand/[slug]/BrandClient.tsx(137,54): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+app/brand/[slug]/BrandClient.tsx(139,41): error TS2345: Argument of type '(prev: string[]) => (string | null)[]' is not assignable to parameter of type 'SetStateAction<string[]>'.
+  Type '(prev: string[]) => (string | null)[]' is not assignable to type '(prevState: string[]) => string[]'.
+    Type '(string | null)[]' is not assignable to type 'string[]'.
+      Type 'string | null' is not assignable to type 'string'.
+        Type 'null' is not assignable to type 'string'.
+app/brand/[slug]/page.tsx(37,5): error TS18047: 'p.brand' is possibly 'null'.
+app/brands/page.tsx(25,23): error TS2740: Type 'Promise<Brand[]>' is missing the following properties from type 'Brand[]': length, pop, push, concat, and 35 more.
+app/brands/page.tsx(25,51): error TS2322: Type 'Promise<Brand[]>' is not assignable to type 'Brand[]'.
+app/cart/page.tsx(61,34): error TS2551: Property 'product_id' does not exist on type 'CartItemWithProduct'. Did you mean 'product'?
+app/cart/page.tsx(63,30): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+app/cart/page.tsx(77,58): error TS2551: Property 'product_id' does not exist on type 'CartItemWithProduct'. Did you mean 'product'?
+app/cart/page.tsx(88,64): error TS2551: Property 'product_id' does not exist on type 'CartItemWithProduct'. Did you mean 'product'?
+app/cart/page.tsx(96,64): error TS2551: Property 'product_id' does not exist on type 'CartItemWithProduct'. Did you mean 'product'?
+app/category/[slug]/CategoryClient.tsx(44,59): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+app/category/[slug]/CategoryClient.tsx(48,35): error TS18048: 'p.rating' is possibly 'undefined'.
+app/category/[slug]/CategoryClient.tsx(57,37): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+app/category/[slug]/CategoryClient.tsx(57,58): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+app/category/[slug]/CategoryClient.tsx(68,31): error TS18048: 'b.rating' is possibly 'undefined'.
+app/category/[slug]/CategoryClient.tsx(68,42): error TS18048: 'a.rating' is possibly 'undefined'.
+app/category/[slug]/page.tsx(37,5): error TS18047: 'p.category' is possibly 'null'.
+app/checkout/page.tsx(493,42): error TS2551: Property 'product_id' does not exist on type 'CartItemWithProduct'. Did you mean 'product'?
+app/checkout/page.tsx(494,28): error TS2551: Property 'product_id' does not exist on type 'CartItemWithProduct'. Did you mean 'product'?
+app/checkout/page.tsx(572,36): error TS2551: Property 'product_id' does not exist on type 'CartItemWithProduct'. Did you mean 'product'?
+app/checkout/page.tsx(574,32): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+app/checkout/page.tsx(837,38): error TS2551: Property 'product_id' does not exist on type 'CartItemWithProduct'. Did you mean 'product'?
+app/checkout/page.tsx(839,34): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+app/product/[slug]/page.tsx(26,18): error TS2322: Type 'string | null' is not assignable to type 'string | URL'.
+  Type 'null' is not assignable to type 'string | URL'.
+app/product/[slug]/ProductDetailClient.tsx(95,16): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+app/product/[slug]/ProductDetailClient.tsx(96,18): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+app/product/[slug]/ProductDetailClient.tsx(96,45): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+app/product/[slug]/ProductDetailClient.tsx(97,132): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+app/product/[slug]/ProductDetailClient.tsx(111,63): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+app/product/[slug]/ProductDetailClient.tsx(117,20): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+app/product/[slug]/ProductDetailClient.tsx(117,104): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+app/product/[slug]/ProductDetailClient.tsx(187,27): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+app/product/[slug]/ProductDetailClient.tsx(187,51): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+app/product/[slug]/ProductDetailClient.tsx(188,22): error TS18048: 'product.usageInstructions' is possibly 'undefined'.
+app/product/[slug]/ProductDetailClient.tsx(199,60): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string | number | boolean'.
+  Type 'null' is not assignable to type 'string | number | boolean'.
+app/product/[slug]/ProductDetailClient.tsx(208,27): error TS2322: Type 'string[] | undefined' is not assignable to type 'string[]'.
+  Type 'undefined' is not assignable to type 'string[]'.
+app/product/[slug]/ProductDetailClient.tsx(250,71): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+app/product/[slug]/ProductDetailClient.tsx(258,20): error TS18048: 'product.totalReviews' is possibly 'undefined'.
+app/product/[slug]/ProductDetailClient.tsx(275,26): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+app/product/[slug]/ProductDetailClient.tsx(277,31): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+app/product/[slug]/ProductDetailClient.tsx(280,26): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+app/product/[slug]/ProductDetailClient.tsx(280,53): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+app/product/[slug]/ProductDetailClient.tsx(282,30): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+app/product/[slug]/ProductDetailClient.tsx(573,22): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+app/product/[slug]/ProductDetailClient.tsx(583,22): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+app/product/[slug]/ProductDetailClient.tsx(584,75): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+app/shop/ShopClient.tsx(61,9): error TS18047: 'p.brand' is possibly 'null'.
+app/shop/ShopClient.tsx(62,9): error TS18047: 'p.category' is possibly 'null'.
+app/shop/ShopClient.tsx(63,9): error TS18048: 'p.shortDescription' is possibly 'undefined'.
+app/shop/ShopClient.tsx(66,67): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+app/shop/ShopClient.tsx(67,59): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+app/shop/ShopClient.tsx(69,31): error TS18048: 'p.rating' is possibly 'undefined'.
+app/shop/ShopClient.tsx(80,34): error TS18048: 'b.rating' is possibly 'undefined'.
+app/shop/ShopClient.tsx(80,45): error TS18048: 'a.rating' is possibly 'undefined'.
+app/shop/ShopClient.tsx(80,57): error TS18048: 'b.totalReviews' is possibly 'undefined'.
+app/shop/ShopClient.tsx(80,74): error TS18048: 'a.totalReviews' is possibly 'undefined'.
+app/shop/ShopClient.tsx(83,39): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+app/shop/ShopClient.tsx(83,66): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+app/shop/ShopClient.tsx(97,5): error TS18047: 'p.brand' is possibly 'null'.
+app/shop/ShopClient.tsx(98,5): error TS18047: 'p.category' is possibly 'null'.
+app/shop/ShopClient.tsx(167,26): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+app/shop/ShopClient.tsx(178,30): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+app/shop/ShopClient.tsx(179,90): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+app/shop/ShopClient.tsx(194,85): error TS18047: 'p.brand' is possibly 'null'.
+app/shop/ShopClient.tsx(598,18): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+app/shop/ShopClient.tsx(612,18): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+app/shop/ShopClient.tsx(612,45): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+app/shop/ShopClient.tsx(614,23): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+app/shop/ShopClient.tsx(653,65): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+app/shop/ShopClient.tsx(656,57): error TS18048: 'product.totalReviews' is possibly 'undefined'.
+app/shop/ShopClient.tsx(662,20): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+app/shop/ShopClient.tsx(663,76): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+app/shop/ShopClient.tsx(686,16): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+app/shop/ShopClient.tsx(687,18): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+app/shop/ShopClient.tsx(687,45): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+app/shop/ShopClient.tsx(689,23): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+app/shop/ShopClient.tsx(700,63): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+app/shop/ShopClient.tsx(708,22): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+app/shop/ShopClient.tsx(709,78): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+components/cart/SlideCart.tsx(66,32): error TS2551: Property 'product_id' does not exist on type 'CartItemWithProduct'. Did you mean 'product'?
+components/cart/SlideCart.tsx(69,23): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+components/cart/SlideCart.tsx(90,62): error TS2551: Property 'product_id' does not exist on type 'CartItemWithProduct'. Did you mean 'product'?
+components/cart/SlideCart.tsx(97,62): error TS2551: Property 'product_id' does not exist on type 'CartItemWithProduct'. Did you mean 'product'?
+components/cart/SlideCart.tsx(105,56): error TS2551: Property 'product_id' does not exist on type 'CartItemWithProduct'. Did you mean 'product'?
+components/CompareDrawer.tsx(84,24): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+components/CompareDrawer.tsx(142,28): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+components/LiveSearch.tsx(38,7): error TS18047: 'p.brand' is possibly 'null'.
+components/LiveSearch.tsx(136,34): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+  Type 'null' is not assignable to type 'string | StaticImport'.
+components/QuickView.tsx(44,17): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+components/QuickView.tsx(49,24): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+components/QuickView.tsx(49,51): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+components/QuickView.tsx(51,29): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+components/QuickView.tsx(57,14): error TS18048: 'product.gallery' is possibly 'undefined'.
+components/QuickView.tsx(59,18): error TS18048: 'product.gallery' is possibly 'undefined'.
+components/QuickView.tsx(83,35): error TS18047: 'product.brand' is possibly 'null'.
+components/QuickView.tsx(100,47): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+components/QuickView.tsx(105,57): error TS18048: 'product.totalReviews' is possibly 'undefined'.
+components/QuickView.tsx(113,24): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+components/QuickView.tsx(115,29): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+components/sections/FeaturedBrands.tsx(49,19): error TS2339: Property 'slice' does not exist on type 'Promise<Brand[]>'.
+components/sections/FeaturedBrands.tsx(49,37): error TS7006: Parameter 'brand' implicitly has an 'any' type.
+components/sections/FeaturedBrands.tsx(49,44): error TS7006: Parameter 'i' implicitly has an 'any' type.
+components/sections/FlashSale.tsx(91,21): error TS2339: Property 'map' does not exist on type 'Promise<Product[]>'.
+components/sections/FlashSale.tsx(91,26): error TS7006: Parameter 'product' implicitly has an 'any' type.
+components/sections/FlashSale.tsx(91,35): error TS7006: Parameter 'i' implicitly has an 'any' type.
+components/shop/FilterSidebar.tsx(240,15): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.
+components/shop/FilterSidebar.tsx(241,39): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+components/shop/FilterSidebar.tsx(242,52): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+components/shop/FilterSidebar.tsx(243,46): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+components/shop/FilterSidebar.tsx(255,15): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.
+components/shop/FilterSidebar.tsx(256,36): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+components/shop/FilterSidebar.tsx(257,48): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+components/shop/FilterSidebar.tsx(258,43): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+components/shop/FilterSidebar.tsx(362,15): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+components/shop/FilterSidebar.tsx(363,51): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+components/shop/FilterSidebar.tsx(364,46): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+components/shop/ProductListCard.tsx(20,28): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+components/shop/ProductListCard.tsx(21,15): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+components/shop/ProductListCard.tsx(22,15): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+components/shop/ProductListCard.tsx(23,28): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+components/shop/ProductListCard.tsx(23,69): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+components/shop/ProductListCard.tsx(36,11): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+components/shop/ProductListCard.tsx(112,38): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+components/shop/ProductListCard.tsx(120,57): error TS18048: 'product.totalReviews' is possibly 'undefined'.
+components/shop/ProductListCard.tsx(147,24): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+components/shop/ProductListCard.tsx(149,29): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+components/shop/ProductListCard.tsx(154,36): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+components/shop/QuickViewModal.tsx(48,15): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+components/shop/QuickViewModal.tsx(56,24): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+components/shop/QuickViewModal.tsx(58,29): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+components/shop/QuickViewModal.tsx(98,38): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+components/shop/QuickViewModal.tsx(106,57): error TS18048: 'product.totalReviews' is possibly 'undefined'.
+components/shop/QuickViewModal.tsx(128,24): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+components/shop/QuickViewModal.tsx(131,31): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+components/shop/QuickViewModal.tsx(134,37): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+components/ui/ProductCard.tsx(27,31): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+components/ui/ProductCard.tsx(28,15): error TS2339: Property 'discountPercent' does not exist on type 'Product'.
+components/ui/ProductCard.tsx(29,15): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+components/ui/ProductCard.tsx(30,28): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+components/ui/ProductCard.tsx(30,69): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+components/ui/ProductCard.tsx(59,13): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+components/ui/ProductCard.tsx(87,36): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+components/ui/ProductCard.tsx(102,24): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+components/ui/ProductCard.tsx(104,29): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+components/ui/ProductCard.tsx(147,11): error TS2322: Type 'string | null' is not assignable to type 'string | StaticImport'.
+components/ui/ProductCard.tsx(260,34): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+components/ui/ProductCard.tsx(267,57): error TS18048: 'product.totalReviews' is possibly 'undefined'.
+components/ui/ProductCard.tsx(276,22): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+components/ui/ProductCard.tsx(278,27): error TS2339: Property 'originalPrice' does not exist on type 'Product'.
+lib/data/productContent.ts(14,15): error TS18047: 'product.category' is possibly 'null'.
+lib/data/productContent.ts(15,15): error TS18047: 'product.category' is possibly 'null'.
+lib/data/products.ts(9,51): error TS2352: Conversion of type '({ id: string; slug: string; name: string; brand: string; category: string; price: number; originalPrice: number; discountPercent: number; rating: number; totalReviews: number; stockStatus: string; ... 7 more ...; gallery: string[]; } | { ...; } | { ...; } | { ...; })[]' to type 'Product[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ id: string; slug: string; name: string; brand: string; category: string; price: number; originalPrice: number; discountPercent: number; rating: number; totalReviews: number; stockStatus: string; ... 7 more ...; gallery: string[]; } | { ...; } | { ...; } | { ...; }' is not comparable to type 'Product'.
+    Property 'stock' is missing in type '{ id: string; slug: string; name: string; brand: string; category: string; price: number; originalPrice: number; discountPercent: number; rating: number; totalReviews: number; stockStatus: string; ... 7 more ...; gallery: string[]; }' but required in type 'Product'.
+lib/data/products.ts(13,12): error TS2352: Conversion of type '({ id: string; slug: string; name: string; brand: string; category: string; price: number; originalPrice: number; discountPercent: number; rating: number; totalReviews: number; stockStatus: string; ... 7 more ...; gallery: string[]; } | { ...; } | { ...; } | { ...; })[]' to type 'Product[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+lib/data/products.ts(73,36): error TS2352: Conversion of type '({ id: string; slug: string; name: string; brand: string; category: string; price: number; originalPrice: number; discountPercent: number; rating: number; totalReviews: number; stockStatus: string; ... 7 more ...; gallery: string[]; } | { ...; } | { ...; } | { ...; })[]' to type 'Product[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.

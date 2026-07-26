@@ -1,5 +1,7 @@
 // Demo data types - replacing Supabase types
 
+import { DEMO_ADDRESSES } from "./data/types";
+
 export type Profile = {
   id: string;
   full_name: string | null;
@@ -13,6 +15,7 @@ export type Profile = {
 };
 
 export type Address = {
+  email: string;
   id: string;
   user_id: string;
   name: string;
@@ -99,34 +102,6 @@ export const DEMO_USER: Profile = {
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
 };
-
-// Demo addresses
-export const DEMO_ADDRESSES: Address[] = [
-  {
-    id: 'addr-001',
-    user_id: 'demo-user-001',
-    name: 'Demo User',
-    phone: '+880 1700-000000',
-    address: '123 Gulshan Avenue',
-    city: 'Dhaka',
-    district: 'Dhaka',
-    postal_code: '1212',
-    is_default: true,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: 'addr-002',
-    user_id: 'demo-user-001',
-    name: 'Demo User (Office)',
-    phone: '+880 1800-000000',
-    address: '456 Banani Road',
-    city: 'Dhaka',
-    district: 'Dhaka',
-    postal_code: '1213',
-    is_default: false,
-    created_at: new Date().toISOString(),
-  },
-];
 
 // Generate demo orders
 function generateDemoOrders(): Order[] {

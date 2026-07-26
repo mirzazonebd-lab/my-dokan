@@ -23,12 +23,12 @@ export default function AddProductPage() {
     badge: 'none',
   });
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     try {
@@ -118,7 +118,7 @@ export default function AddProductPage() {
                       <option value="">Select brand</option>
                       <option value="COSRX">COSRX</option>
                       <option value="Maybelline">Maybelline</option>
-                      <option value="L'Oreal">L'Oreal</option>
+                      <option value="L'Oreal">L&apos;Oreal</option>
                       <option value="MAC">MAC</option>
                     </select>
                   </div>

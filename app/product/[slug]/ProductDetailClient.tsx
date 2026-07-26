@@ -150,7 +150,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
   const { addItem, clearCart } = useCart();
   const router = useRouter();
 
-  const handleAddToCart = async () => {
+   const handleAddToCart = async () => {
     try {
       await addItem(product, qty);
     } catch (err) {
@@ -162,8 +162,10 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
 
   const handleBuyNow = async (e?: React.MouseEvent) => {
     e?.preventDefault();
+
     try {
-      await addItem(product, qty);
+      await clearCart(); // Clear previous cart
+      await addItem(product, qty); // Add only current product
       router.push(`/checkout?product=${encodeURIComponent(product.slug)}&qty=${qty}`);
     } catch (err) {
       // ignore failures for now
