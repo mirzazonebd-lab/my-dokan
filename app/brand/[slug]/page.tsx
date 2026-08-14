@@ -34,7 +34,7 @@ export default function BrandPage({ params }: Props) {
   if (!brand) notFound();
 
   const brandProducts = products.filter(p =>
-    p.brand.toLowerCase() === brand.name.toLowerCase()
+    (p.brand || '').toLowerCase() === brand.name.toLowerCase()
   );
 
   return (

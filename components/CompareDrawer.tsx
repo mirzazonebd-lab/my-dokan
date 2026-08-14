@@ -81,7 +81,7 @@ function CompareDrawer() {
               className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2"
             >
               <div className="relative w-10 h-10 rounded overflow-hidden bg-white/20">
-                <Image src={product.image} alt={product.name} fill className="object-cover" />
+                <Image src={product.image || '/placeholder.png'} alt={product.name} fill className="object-cover" />
               </div>
               <span className="text-sm truncate max-w-[120px]">{product.name}</span>
               <button
@@ -139,7 +139,7 @@ function CompareTable() {
               <th key={p.id} className="p-3 text-center">
                 <div className="flex flex-col items-center gap-2">
                   <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-gray-100">
-                    <Image src={p.image} alt={p.name} fill className="object-cover" />
+                    <Image src={p.image || '/placeholder.png'} alt={p.name} fill className="object-cover" />
                   </div>
                   <Link href={`/product/${p.slug}`} className="text-sm font-medium hover:text-[#C4818A]">
                     {p.name}

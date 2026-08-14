@@ -92,7 +92,7 @@ function RelatedProductCard({ product }: { product: Product }) {
   return (
     <Link href={`/product/${product.slug}`} className="group block bg-white rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1">
       <div className="relative aspect-square overflow-hidden bg-rose-50">
-        <Image src={product.image} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="200px" />
+        <Image src={product.image || '/placeholder.png'} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="200px" />
         {product.discountPercent && product.discountPercent > 0 && (
           <span className="absolute top-2 left-2 px-2 py-0.5 bg-[#C4818A] text-white text-[10px] font-bold rounded-full">-{product.discountPercent}%</span>
         )}
@@ -108,7 +108,7 @@ function RelatedProductCard({ product }: { product: Product }) {
         <h4 className="text-xs font-medium text-gray-800 line-clamp-2 leading-snug mb-2">{product.name}</h4>
         <div className="flex items-center gap-1 mb-2">
           {Array.from({ length: 5 }, (_, i) => (
-            <Star key={i} size={10} className={i < Math.round(product.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'} />
+            <Star key={i} size={10} className={i < Math.round(product.rating ?? 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'} />
           ))}
           <span className="text-[10px] text-gray-400">({product.totalReviews})</span>
         </div>
@@ -187,7 +187,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
   };
 
   const savings = product.originalPrice ? product.originalPrice - product.price : 0;
-  const usageSteps = product.usageInstructions.split('.').filter(s => s.trim()).map(s => s.trim());
+  const usageSteps = (product.usageInstructions || '').split('.').filter(s => s.trim()).map(s => s.trim());
 
   return (
     <div className="relative">
@@ -207,7 +207,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-12 mb-12">
           {/* Left: Image Gallery */}
           <div>
-            <ImageGallery images={product.gallery} productName={product.name} />
+            <ImageGallery images={product.gallery || []} productName={product.name} />
           </div>
 
           {/* Right: Product Info */}
@@ -249,7 +249,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-0.5">
                   {Array.from({ length: 5 }, (_, i) => (
-                    <Star key={i} size={16} className={i < Math.round(product.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'} />
+                    <Star key={i} size={16} className={i < Math.round(product.rating ?? 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'} />
                   ))}
                 </div>
                 <span className="font-bold text-[#1C1C2E]">{product.rating}</span>
@@ -257,7 +257,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                   onClick={() => setActiveTab('reviews')}
                   className="text-sm text-[#C4818A] underline underline-offset-2 hover:no-underline"
                 >
-                  {product.totalReviews.toLocaleString()} reviews
+                  {(product.totalReviews ?? 0).toLocaleString()} reviews
                 </button>
               </div>
               <div className="flex items-center gap-1.5 text-sm text-gray-400">
@@ -572,7 +572,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-3 flex-1 min-w-0">
             <div className="relative w-11 h-11 rounded-xl overflow-hidden bg-rose-50 flex-shrink-0">
-              <Image src={product.image} alt={product.name} fill className="object-cover" sizes="44px" />
+              <Image src={product.image || '/placeholder.png'} alt={product.name} fill className="object-cover" sizes="44px" />
             </div>
             <div className="min-w-0">
               <p className="text-sm font-semibold text-[#1C1C2E] truncate">{product.name}</p>

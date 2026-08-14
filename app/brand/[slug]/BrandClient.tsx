@@ -34,7 +34,7 @@ export default function BrandClient({ brand, products: initialProducts }: Props)
 
   // Get unique categories from products
   const availableCategories = useMemo(() => {
-    const cats = new Set(initialProducts.map(p => p.category));
+    const cats = new Set(initialProducts.map(p => p.category).filter((c): c is string => c !== null));
     return Array.from(cats);
   }, [initialProducts]);
 
@@ -44,7 +44,7 @@ export default function BrandClient({ brand, products: initialProducts }: Props)
 
     // Category filter
     if (selectedCategory.length > 0) {
-      result = result.filter(p => selectedCategory.includes(p.category));
+      result = result.filter(p => p.category !== null && selectedCategory.includes(p.category));
     }
 
     // Price filter
@@ -52,7 +52,7 @@ export default function BrandClient({ brand, products: initialProducts }: Props)
 
     // Rating filter
     if (minRating > 0) {
-      result = result.filter(p => p.rating >= minRating);
+      result = result.filter(p => (p.rating ?? 0) >= minRating);
     }
 
     // In stock filter
@@ -79,7 +79,7 @@ export default function BrandClient({ brand, products: initialProducts }: Props)
         result.sort((a, b) => b.price - a.price);
         break;
       case 'rating':
-        result.sort((a, b) => b.rating - a.rating);
+        result.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
         break;
       case 'newest':
         result.sort((a, b) => (b.badge === 'New' ? 1 : 0) - (a.badge === 'New' ? 1 : 0));
@@ -119,9 +119,9 @@ export default function BrandClient({ brand, products: initialProducts }: Props)
 
   // Stats
   const avgRating = initialProducts.length > 0
-    ? (initialProducts.reduce((sum, p) => sum + p.rating, 0) / initialProducts.length).toFixed(1)
+    ? (initialProducts.reduce((sum, p) => sum + (p.rating ?? 0), 0) / initialProducts.length).toFixed(1)
     : '0.0';
-  const totalReviews = initialProducts.reduce((sum, p) => sum + p.totalReviews, 0);
+  const totalReviews = initialProducts.reduce((sum, p) => sum + (p.totalReviews ?? 0), 0);
   const bestSellers = initialProducts.filter(p => p.badge === 'Best Seller').length;
 
   const FiltersContent = () => (

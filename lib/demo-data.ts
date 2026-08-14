@@ -15,7 +15,7 @@ export type Profile = {
 };
 
 export type Address = {
-  email: string;
+  email?: string;
   id: string;
   user_id: string;
   name: string;

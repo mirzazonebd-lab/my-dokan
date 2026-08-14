@@ -490,10 +490,10 @@ function CheckoutContent() {
           zone: isDhaka(ship.district) ? 'dhaka' : 'outside_dhaka',
         },
         items: items.map(item => ({
-          id: `item-${Date.now()}-${item.product_id}`,
-          product_id: item.product_id,
+          id: `item-${Date.now()}-${item.product.id}`,
+          product_id: item.product.id,
           product_name: item.product.name,
-          product_image: item.product.image,
+          product_image: item.product.image || '/placeholder.png',
           brand: item.product.brand,
           price: item.product.price,
           quantity: item.quantity,
@@ -569,9 +569,9 @@ function CheckoutContent() {
               <Card icon={<ShoppingBag size={16} className="text-[#C4818A]" />} title="Your Cart">
                 <div className="space-y-4">
                   {items.map(item => (
-                    <div key={item.product_id} className="flex gap-4 items-center">
+                    <div key={item.product.id} className="flex gap-4 items-center">
                       <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-rose-50 flex-shrink-0">
-                        <Image src={item.product.image} alt={item.product.name} fill className="object-cover" />
+                        <Image src={item.product.image || '/placeholder.png'} alt={item.product.name} fill className="object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-[#C4818A] font-medium">{item.product.brand}</p>
@@ -834,9 +834,9 @@ function CheckoutContent() {
                   </div>
                   <div className="space-y-3">
                     {items.map(item => (
-                      <div key={item.product_id} className="flex gap-3 items-center">
+                      <div key={item.product.id} className="flex gap-3 items-center">
                         <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-rose-50 flex-shrink-0">
-                          <Image src={item.product.image} alt={item.product.name} fill className="object-cover" />
+                          <Image src={item.product.image || '/placeholder.png'} alt={item.product.name} fill className="object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-[#C4818A] font-medium">{item.product.brand}</p>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Zap, ArrowRight, ShoppingBag, Star, Clock } from 'lucide-react';
 import { getFlashSaleProducts } from '@/lib/data/products';
+import type { Product } from '@/lib/data/types';
 
 function useCountdown(targetHours = 8) {
   const [timeLeft, setTimeLeft] = useState({
@@ -44,8 +45,12 @@ function CountdownUnit({ value, label }: { value: number; label: string }) {
 }
 
 export default function FlashSale() {
-  const products = getFlashSaleProducts();
+  const [products, setProducts] = useState<Product[]>([]);
   const timeLeft = useCountdown(8);
+
+  useEffect(() => {
+    getFlashSaleProducts().then(setProducts).catch(() => setProducts([]));
+  }, []);
 
   return (
     <section className="py-16 md:py-24 bg-white overflow-hidden">
@@ -104,7 +109,7 @@ export default function FlashSale() {
                 {/* Image */}
                 <div className="relative aspect-square overflow-hidden bg-rose-50">
                   <Image
-                    src={product.image}
+                    src={product.image || '/placeholder.png'}
                     alt={product.name}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -126,7 +131,7 @@ export default function FlashSale() {
 
                 {/* Info */}
                 <div className="p-3">
-                  <p className="text-[10px] font-semibold text-[#C4818A] mb-0.5">{product.brand}</p>
+                  <p className="text-[10px] font-semibold text-[#C4818A] mb-0.5">{product.brand || ''}</p>
                   <h3 className="text-xs font-medium text-gray-800 line-clamp-2 leading-snug mb-2">
                     {product.name}
                   </h3>
@@ -135,7 +140,7 @@ export default function FlashSale() {
                   <div className="flex items-center gap-1 mb-2">
                     <Star size={10} className="text-yellow-400 fill-yellow-400" />
                     <span className="text-[10px] text-gray-500">
-                      {product.rating} ({product.totalReviews})
+                      {product.rating ?? 0} ({product.totalReviews ?? 0})
                     </span>
                   </div>
 

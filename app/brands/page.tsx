@@ -14,9 +14,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BrandsPage() {
-  const koreanBrands = getKoreanBrands();
-  const internationalBrands = getInternationalBrands();
+export default async function BrandsPage() {
+  const koreanBrands = await getKoreanBrands();
+  const internationalBrands = await getInternationalBrands();
 
   return (
     <ClientWrapper>

@@ -58,15 +58,15 @@ function applyFilters(all: Product[], filters: FilterState, query: string): Prod
       const q = query.toLowerCase();
       const match =
         p.name.toLowerCase().includes(q) ||
-        p.brand.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q) ||
-        p.shortDescription.toLowerCase().includes(q);
+        (p.brand || '').toLowerCase().includes(q) ||
+        (p.category || '').toLowerCase().includes(q) ||
+        (p.shortDescription || '').toLowerCase().includes(q);
       if (!match) return false;
     }
-    if (filters.categories.length && !filters.categories.includes(p.category)) return false;
-    if (filters.brands.length && !filters.brands.includes(p.brand)) return false;
+    if (filters.categories.length && !filters.categories.includes(p.category || '')) return false;
+    if (filters.brands.length && !filters.brands.includes(p.brand || '')) return false;
     if (p.price < filters.priceMin || p.price > filters.priceMax) return false;
-    if (filters.rating > 0 && p.rating < filters.rating) return false;
+    if (filters.rating > 0 && (p.rating ?? 0) < filters.rating) return false;
     if (filters.inStockOnly && p.stockStatus !== 'in_stock') return false;
     return true;
   });
@@ -77,7 +77,7 @@ function applySort(list: Product[], sort: SortKey): Product[] {
     switch (sort) {
       case 'price-asc': return a.price - b.price;
       case 'price-desc': return b.price - a.price;
-      case 'rating-desc': return b.rating - a.rating || b.totalReviews - a.totalReviews;
+      case 'rating-desc': return (b.rating ?? 0) - (a.rating ?? 0) || (b.totalReviews ?? 0) - (a.totalReviews ?? 0);
       case 'newest': return (b.badge === 'New' ? 1 : 0) - (a.badge === 'New' ? 1 : 0);
       case 'bestselling': return (b.badge === 'Best Seller' ? 1 : 0) - (a.badge === 'Best Seller' ? 1 : 0);
       case 'discount-desc': return (b.discountPercent || 0) - (a.discountPercent || 0);
@@ -94,8 +94,8 @@ function SearchDropdown({ query, onClose }: { query: string; onClose: () => void
   const q = query.toLowerCase();
   const matchedProducts = products.filter(p =>
     p.name.toLowerCase().includes(q) ||
-    p.brand.toLowerCase().includes(q) ||
-    p.category.toLowerCase().includes(q)
+    (p.brand || '').toLowerCase().includes(q) ||
+    (p.category || '').toLowerCase().includes(q)
   ).slice(0, 5);
 
   const matchedCategories = CATEGORIES.filter(c => c.toLowerCase().includes(q));
@@ -164,15 +164,15 @@ function SearchDropdown({ query, onClose }: { query: string; onClose: () => void
                 className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 transition-colors"
               >
                 <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                  <Image src={product.image} alt={product.name} fill className="object-cover" />
+                  <Image src={product.image || '/placeholder.png'} alt={product.name} fill className="object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-[#C4818A] font-medium">{product.brand}</p>
+                  <p className="text-xs text-[#C4818A] font-medium">{product.brand || ''}</p>
                   <p className="text-sm font-medium text-gray-800 truncate">{product.name}</p>
                   <div className="flex items-center gap-2 mt-0.5">
                     <div className="flex items-center gap-0.5">
                       <Star size={10} className="text-yellow-400 fill-yellow-400" />
-                      <span className="text-[10px] text-gray-500">{product.rating}</span>
+                      <span className="text-[10px] text-gray-500">{product.rating ?? 0}</span>
                     </div>
                     <span className="text-xs font-semibold text-[#1C1C2E]">৳{product.price.toLocaleString()}</span>
                     {product.originalPrice && (
@@ -191,7 +191,7 @@ function SearchDropdown({ query, onClose }: { query: string; onClose: () => void
         onClick={onClose}
         className="block text-center py-2.5 text-sm text-[#C4818A] font-medium bg-gray-50 hover:bg-[#C4818A] hover:text-white transition-colors"
       >
-        View all results ({products.filter(p => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q)).length})
+        View all results ({products.filter(p => p.name.toLowerCase().includes(q) || (p.brand || '').toLowerCase().includes(q)).length})
       </Link>
     </div>
   );
@@ -595,7 +595,7 @@ function ProductCard({ product, onQuickView }: { product: Product; onQuickView: 
     <div className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all">
       <div className="relative aspect-square overflow-hidden bg-rose-50">
         <Link href={`/product/${product.slug}`} className="block w-full h-full relative">
-          <Image src={product.image} alt={product.name} fill sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
+          <Image src={product.image || '/placeholder.png'} alt={product.name} fill sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
         </Link>
 
         {/* Badge */}
@@ -650,10 +650,10 @@ function ProductCard({ product, onQuickView }: { product: Product; onQuickView: 
         <div className="flex items-center gap-1 mb-2">
           <div className="flex gap-0.5">
             {Array.from({ length: 5 }, (_, i) => (
-              <Star key={i} size={11} className={i < Math.round(product.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200'} />
+              <Star key={i} size={11} className={i < Math.round(product.rating ?? 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200'} />
             ))}
           </div>
-          <span className="text-[10px] text-gray-400">({product.totalReviews.toLocaleString()})</span>
+          <span className="text-[10px] text-gray-400">({(product.totalReviews ?? 0).toLocaleString()})</span>
         </div>
 
         {/* Price */}
@@ -683,7 +683,7 @@ function ProductListCard({ product, onQuickView }: { product: Product; onQuickVi
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-sm flex gap-4 p-4">
       <div className="relative w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden bg-rose-50">
-        <Image src={product.image} alt={product.name} fill sizes="128px" className="object-cover" />
+        <Image src={product.image || '/placeholder.png'} alt={product.name} fill sizes="128px" className="object-cover" />
         {product.discountPercent && product.discountPercent > 0 && (
           <span className="absolute top-2 left-2 px-2 py-0.5 bg-[#C4818A] text-white text-[10px] font-bold rounded-full">
             -{product.discountPercent}%
@@ -697,9 +697,9 @@ function ProductListCard({ product, onQuickView }: { product: Product; onQuickVi
         </a>
         <div className="flex items-center gap-1 mb-2">
           {Array.from({ length: 5 }, (_, i) => (
-            <Star key={i} size={12} className={i < Math.round(product.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200'} />
+            <Star key={i} size={12} className={i < Math.round(product.rating ?? 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200'} />
           ))}
-          <span className="text-xs text-gray-400">({product.totalReviews})</span>
+          <span className="text-xs text-gray-400">({product.totalReviews ?? 0})</span>
         </div>
         <p className="text-sm text-gray-500 line-clamp-2 mb-2">{product.shortDescription}</p>
         <div className="flex items-center gap-4">

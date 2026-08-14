@@ -8,6 +8,8 @@ export interface Product {
   category: string | null;
   price: number;
   compare_price?: number | null;
+  originalPrice?: number;
+  discountPercent?: number;
   stock: number;
   image: string | null;
   badge?: string | null;
@@ -96,6 +98,7 @@ export const DEMO_ADDRESSES: Address[] = [
     postal_code: '1212',
     is_default: true,
     created_at: new Date().toISOString(),
+    email: 'demo@beautydokanbd.com',
   },
   {
     id: 'addr-002',
@@ -108,6 +111,6 @@ export const DEMO_ADDRESSES: Address[] = [
     postal_code: '1213',
     is_default: false,
     created_at: new Date().toISOString(),
-    email: ""
+    email: '',
   },
 ];

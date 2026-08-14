@@ -1,7 +1,11 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, ExternalLink } from 'lucide-react';
 import { getFeaturedBrands } from '@/middleware';
+import type { Brand } from '@/lib/data/types';
 
 const brandColors: Record<string, string> = {
   COSRX: 'from-sky-50 to-blue-50',
@@ -17,7 +21,11 @@ const brandColors: Record<string, string> = {
 };
 
 export default function FeaturedBrands() {
-  const brands = getFeaturedBrands();
+  const [brands, setBrands] = useState<Brand[]>([]);
+
+  useEffect(() => {
+    getFeaturedBrands().then(setBrands).catch(() => setBrands([]));
+  }, []);
 
   return (
     <section className="py-16 md:py-24 bg-rose-50/30">

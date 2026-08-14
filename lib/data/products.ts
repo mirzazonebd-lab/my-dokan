@@ -6,7 +6,7 @@ export async function getProducts(): Promise<Product[]> {
   try {
     // Try to fetch from Supabase
     const result = await getProductsFromDB();
-    return result && result.length > 0 ? result : productsData as Product[];
+    return result && result.length > 0 ? result : (productsData as unknown as Product[]);
   } catch (error: any) {
     // Fallback to JSON data
     console.log('Using fallback products data from JSON');

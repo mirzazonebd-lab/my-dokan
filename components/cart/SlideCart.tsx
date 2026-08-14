@@ -63,10 +63,10 @@ export default function SlideCart({ open, onOpenChange }: SlideCartProps) {
             {/* Cart items */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {items.map(item => (
-                <div key={item.product_id} className="flex gap-3 bg-white rounded-xl p-3 border border-gray-100">
+                <div key={item.product.id} className="flex gap-3 bg-white rounded-xl p-3 border border-gray-100">
                   <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-rose-50">
                     <Image
-                      src={item.product.image}
+                      src={item.product.image || '/placeholder.png'}
                       alt={item.product.name}
                       fill
                       className="object-cover"
@@ -87,14 +87,14 @@ export default function SlideCart({ open, onOpenChange }: SlideCartProps) {
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center gap-1">
                         <button
-                          onClick={() => updateQuantity(item.product_id, item.quantity - 1)}
+                          onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
                           className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
                         >
                           <Minus size={14} />
                         </button>
                         <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(item.product_id, item.quantity + 1)}
+                          onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
                           className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
                         >
                           <Plus size={14} />
@@ -102,7 +102,7 @@ export default function SlideCart({ open, onOpenChange }: SlideCartProps) {
                       </div>
 
                       <button
-                        onClick={() => removeItem(item.product_id)}
+                        onClick={() => removeItem(item.product.id)}
                         className="text-gray-400 hover:text-red-500 transition-colors p-1"
                       >
                         <Trash2 size={16} />

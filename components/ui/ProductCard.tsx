@@ -56,7 +56,7 @@ export default function ProductCard({ product, variant = 'default', onQuickView 
       <div className="group relative bg-white rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 flex gap-4 p-4">
         <div className="relative w-28 h-28 flex-shrink-0 rounded-xl overflow-hidden bg-rose-50">
           <Image
-            src={imageError ? 'https://images.pexels.com/photos/3762875/pexels-photo-3762875.jpeg?auto=compress&cs=tinysrgb&w=500' : product.image}
+            src={imageError ? 'https://images.pexels.com/photos/3762875/pexels-photo-3762875.jpeg?auto=compress&cs=tinysrgb&w=500' : (product.image || '/placeholder.png')}
             alt={product.name}
             fill
             className="object-cover"
@@ -70,7 +70,7 @@ export default function ProductCard({ product, variant = 'default', onQuickView 
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[10px] font-semibold text-[#C4818A] uppercase tracking-wider mb-1">
-            {product.brand}
+            {product.brand || ''}
           </p>
           <Link href={`/product/${product.slug}`}>
             <h3 className="text-sm font-medium text-gray-800 hover:text-[#C4818A] transition-colors line-clamp-1">
@@ -84,16 +84,16 @@ export default function ProductCard({ product, variant = 'default', onQuickView 
                   key={i}
                   size={10}
                   className={
-                    i < Math.round(product.rating)
+                    i < Math.round(product.rating ?? 0)
                       ? 'text-yellow-400 fill-yellow-400'
                       : 'text-gray-200 fill-gray-200'
                   }
                 />
               ))}
             </div>
-            <span className="text-[10px] text-gray-400">({product.totalReviews})</span>
+            <span className="text-[10px] text-gray-400">({product.totalReviews ?? 0})</span>
           </div>
-          <p className="text-xs text-gray-500 line-clamp-2 mt-1.5">{product.shortDescription}</p>
+          <p className="text-xs text-gray-500 line-clamp-2 mt-1.5">{product.shortDescription || ''}</p>
           <div className="flex items-center justify-between mt-2">
             <div className="flex items-center gap-1.5">
               <span className="text-base font-bold text-[#1C1C2E]">
@@ -144,7 +144,7 @@ export default function ProductCard({ product, variant = 'default', onQuickView 
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-rose-50">
         <Image
-          src={imageError ? 'https://images.pexels.com/photos/3762875/pexels-photo-3762875.jpeg?auto=compress&cs=tinysrgb&w=500' : product.image}
+          src={imageError ? 'https://images.pexels.com/photos/3762875/pexels-photo-3762875.jpeg?auto=compress&cs=tinysrgb&w=500' : (product.image || '/placeholder.png')}
           alt={product.name}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -241,7 +241,7 @@ export default function ProductCard({ product, variant = 'default', onQuickView 
       {/* Product Info */}
       <div className="p-3.5">
         <p className="text-[10px] font-semibold text-[#C4818A] uppercase tracking-wider mb-1">
-          {product.brand}
+          {product.brand || ''}
         </p>
         <Link href={`/product/${product.slug}`}>
           <h3 className="text-sm font-medium text-gray-800 line-clamp-2 hover:text-[#C4818A] transition-colors leading-snug mb-2">
@@ -257,14 +257,14 @@ export default function ProductCard({ product, variant = 'default', onQuickView 
                 key={i}
                 size={11}
                 className={
-                  i < Math.round(product.rating)
+                  i < Math.round(product.rating ?? 0)
                     ? 'text-yellow-400 fill-yellow-400'
                     : 'text-gray-200 fill-gray-200'
                 }
               />
             ))}
           </div>
-          <span className="text-[10px] text-gray-400">({product.totalReviews.toLocaleString()})</span>
+          <span className="text-[10px] text-gray-400">({(product.totalReviews ?? 0).toLocaleString()})</span>
         </div>
 
         {/* Price */}
