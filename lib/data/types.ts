@@ -1,30 +1,28 @@
-import { Address } from "../demo-data";
-
 export interface Product {
   id: string;
   slug: string;
   name: string;
-  brand: string | null;
-  category: string | null;
+  brand: string;
+  category: string;
   price: number;
   compare_price?: number | null;
-  originalPrice?: number;
-  discountPercent?: number;
+  originalPrice?: number | null;
+  discountPercent?: number | null;
   stock: number;
+  stockStatus?: 'in_stock' | 'out_of_stock' | string | null;
   image: string | null;
   badge?: string | null;
   description?: string | null;
   featured?: boolean;
   active?: boolean;
-  rating?: number;
-  totalReviews?: number;
-  stockStatus?: string;
-  shortDescription?: string;
-  fullDescription?: string;
-  ingredients?: string;
-  skinType?: string;
-  usageInstructions?: string;
-  gallery?: string[];
+  rating?: number | null;
+  totalReviews?: number | null;
+  shortDescription?: string | null;
+  fullDescription?: string | null;
+  ingredients?: string | null;
+  skinType?: string | null;
+  usageInstructions?: string | null;
+  gallery?: string[] | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -48,7 +46,7 @@ export interface Brand {
   id: string;
   name: string;
   slug: string;
-  logo: string;
+  logo: string | null;
   country: string;
   description: string;
   isKorean: boolean;
@@ -84,7 +82,6 @@ export interface Coupon {
   created_at?: string;
   updated_at?: string;
 }
-// Demo addresses
 
 export const DEMO_ADDRESSES: Address[] = [
   {

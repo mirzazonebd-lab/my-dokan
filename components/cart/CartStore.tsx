@@ -1,13 +1,13 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
-import { CartItem, Address } from '@/lib/demo-data';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { Product } from '@/lib/data/types';
 import { getProducts, updateProduct } from '@/lib/data/products';
 
 interface CartItemWithProduct {
   id: string;
   user_id: string;
+  product_id: string;
   quantity: number;
   created_at: string;
   updated_at: string;
@@ -21,7 +21,7 @@ interface CartContextType {
   removeItem: (productId: string) => Promise<void>;
   updateQuantity: (productId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
-  checkoutCart: () => Promise<void>; // Decreases inventory
+  checkoutCart: () => Promise<void>;
   itemCount: number;
   subtotal: number;
   shipping: number;
@@ -38,29 +38,29 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItemWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load cart from localStorage
   useEffect(() => {
     const loadCart = async () => {
       setLoading(true);
       try {
         const savedCart = localStorage.getItem(CART_STORAGE_KEY);
         if (savedCart) {
-          const cartData = JSON.parse(savedCart);
+          const cartData = JSON.parse(savedCart) as Array<{ productId: string; quantity: number }>;
           const products = await getProducts();
           const itemsWithProducts: CartItemWithProduct[] = cartData
-            .map((item: { productId: string; quantity: number }) => {
+            .map((item) => {
               const product = products.find((p: Product) => p.id === item.productId);
               if (!product) return null;
               return {
                 id: item.productId,
                 user_id: 'guest',
+                product_id: item.productId,
                 quantity: item.quantity,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
                 product,
               };
             })
-            .filter(Boolean) as CartItemWithProduct[];
+            .filter((item): item is CartItemWithProduct => Boolean(item));
 
           setItems(itemsWithProducts);
         }
@@ -75,10 +75,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     loadCart();
   }, []);
 
-  // Save cart to localStorage whenever items change
   useEffect(() => {
     if (!loading) {
-      const cartData = items.map(item => ({
+      const cartData = items.map((item) => ({
         productId: item.product.id,
         quantity: item.quantity,
       }));
@@ -87,11 +86,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items, loading]);
 
   const addItem = async (product: Product, quantity: number = 1) => {
-    setItems(prev => {
-      const existing = prev.find(item => item.product.id === product.id);
+    setItems((prev) => {
+      const existing = prev.find((item) => item.product.id === product.id);
 
       if (existing) {
-        return prev.map(item =>
+        return prev.map((item) =>
           item.product.id === product.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
@@ -101,6 +100,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const newItem: CartItemWithProduct = {
         id: product.id,
         user_id: 'guest',
+        product_id: product.id,
         quantity,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -112,7 +112,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const removeItem = async (productId: string) => {
-    setItems(prev => prev.filter(item => item.product.id !== productId));
+    setItems((prev) => prev.filter((item) => item.product.id !== productId));
   };
 
   const updateQuantity = async (productId: string, quantity: number) => {
@@ -121,8 +121,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    setItems(prev =>
-      prev.map(item =>
+    setItems((prev) =>
+      prev.map((item) =>
         item.product.id === productId ? { ...item, quantity } : item
       )
     );
@@ -133,11 +133,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(CART_STORAGE_KEY);
   };
 
-  // Decrease inventory for all items in cart (called on checkout success)
   const checkoutCart = async () => {
     try {
       for (const item of items) {
-        const newStock = Math.max(0, item.product.stock - item.quantity);
+        const newStock = Math.max(0, (item.product.stock ?? 0) - item.quantity);
         await updateProduct(item.product.id, { stock: newStock });
       }
       await clearCart();
@@ -146,7 +145,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const subtotal = items.reduce((sum, item) => sum + (item.product.price ?? 0) * item.quantity, 0);
   const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
   const total = subtotal + shipping;
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -172,7 +171,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
 export function useCart() {
   const context = useContext(CartContext);
-  // During SSR, context will be undefined - return a default safe state
   if (context === undefined) {
     return {
       items: [],

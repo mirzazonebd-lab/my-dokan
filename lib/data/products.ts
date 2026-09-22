@@ -2,12 +2,14 @@ import { Product } from './types';
 import { getProductsFromDB } from '@/lib/supabase/db';
 import productsData from '@/data/products.json';
 
-const normalizeProduct = (product: Partial<Product> & { id?: string; slug?: string; name?: string; price?: number; brand?: string | null; category?: string | null; image?: string | null }): Product => ({
+const normalizeProduct = (
+  product: Partial<Product> & { id?: string; slug?: string; name?: string; price?: number; brand?: string | null; category?: string | null; image?: string | null }
+): Product => ({
   id: product.id ?? crypto.randomUUID(),
   slug: product.slug ?? product.id ?? crypto.randomUUID(),
   name: product.name ?? 'Unnamed Product',
-  brand: product.brand ?? null,
-  category: product.category ?? null,
+  brand: product.brand ?? 'Unknown Brand',
+  category: product.category ?? 'General',
   price: product.price ?? 0,
   compare_price: product.compare_price ?? null,
   originalPrice: product.originalPrice ?? null,
