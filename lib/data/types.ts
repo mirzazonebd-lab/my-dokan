@@ -1,3 +1,6 @@
+import { Address } from '../demo-data';
+
+/** Canonical product shape used by storefront, cart, checkout, and admin UI. */
 export interface Product {
   id: string;
   slug: string;
@@ -9,20 +12,20 @@ export interface Product {
   originalPrice?: number | null;
   discountPercent?: number | null;
   stock: number;
-  stockStatus?: 'in_stock' | 'out_of_stock' | string | null;
-  image: string | null;
+  stockStatus: 'in_stock' | 'out_of_stock' | string;
+  image: string;
   badge?: string | null;
   description?: string | null;
   featured?: boolean;
   active?: boolean;
-  rating?: number | null;
-  totalReviews?: number | null;
-  shortDescription?: string | null;
+  rating: number;
+  totalReviews: number;
+  shortDescription: string;
   fullDescription?: string | null;
   ingredients?: string | null;
   skinType?: string | null;
-  usageInstructions?: string | null;
-  gallery?: string[] | null;
+  usageInstructions: string;
+  gallery: string[];
   created_at?: string;
   updated_at?: string;
 }
@@ -46,7 +49,7 @@ export interface Brand {
   id: string;
   name: string;
   slug: string;
-  logo: string | null;
+  logo: string;
   country: string;
   description: string;
   isKorean: boolean;
@@ -85,29 +88,13 @@ export interface Coupon {
 
 export const DEMO_ADDRESSES: Address[] = [
   {
-    id: 'addr-001',
-    user_id: 'demo-user-001',
-    name: 'Demo User',
-    phone: '+880 1700-000000',
-    address: '123 Gulshan Avenue',
-    city: 'Dhaka',
-    district: 'Dhaka',
-    postal_code: '1212',
-    is_default: true,
-    created_at: new Date().toISOString(),
-    email: 'demo@beautydokanbd.com',
+    id: 'addr-001', user_id: 'demo-user-001', name: 'Demo User', phone: '+880 1700-000000',
+    address: '123 Gulshan Avenue', city: 'Dhaka', district: 'Dhaka', postal_code: '1212',
+    is_default: true, created_at: new Date().toISOString(), email: 'demo@beautydokanbd.com',
   },
   {
-    id: 'addr-002',
-    user_id: 'demo-user-001',
-    name: 'Demo User (Office)',
-    phone: '+880 1800-000000',
-    address: '456 Banani Road',
-    city: 'Dhaka',
-    district: 'Dhaka',
-    postal_code: '1213',
-    is_default: false,
-    created_at: new Date().toISOString(),
-    email: '',
+    id: 'addr-002', user_id: 'demo-user-001', name: 'Demo User (Office)', phone: '+880 1800-000000',
+    address: '456 Banani Road', city: 'Dhaka', district: 'Dhaka', postal_code: '1213',
+    is_default: false, created_at: new Date().toISOString(), email: '',
   },
 ];
