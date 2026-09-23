@@ -4,7 +4,6 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import AnnouncementTicker from '@/components/sections/AnnouncementTicker';
 import HeroBanner from '@/components/sections/HeroBanner';
-import TrustBadges from '@/components/sections/TrustBadges';
 import FeaturedCategories from '@/components/sections/FeaturedCategories';
 import BestSellers from '@/components/sections/BestSellers';
 import WhyChooseUs from '@/components/sections/WhyChooseUs';
@@ -21,7 +20,6 @@ export default function HomeContent() {
         <AnnouncementTicker />
         <main>
           <HeroBanner />
-          <TrustBadges />
           <FeaturedCategories />
           <BestSellers />
           <WhyChooseUs />

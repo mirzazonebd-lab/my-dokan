@@ -135,7 +135,7 @@ export default function HeroBanner() {
 
           {/* Subheadline */}
           <p
-            className={`text-white/65 text-base sm:text-lg leading-relaxed mb-8 max-w-md transition-all duration-500 ${
+            className={`text-white/90 text-base sm:text-lg leading-relaxed mb-8 max-w-md transition-all duration-500 ${
               isAnimating ? 'opacity-0 translate-y-5' : 'opacity-100 translate-y-0'
             }`}
             style={{ transitionDelay: '160ms' }}
