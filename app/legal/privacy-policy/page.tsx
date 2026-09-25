@@ -31,7 +31,7 @@ export default function PrivacyPolicyPage() {
             'Full name, phone number, and email address provided during checkout.',
             'Shipping address including city, district, and postal code.',
             'Order history and product preferences.',
-            'Payment method used (Cash on Delivery, bKash, or Nagad) — we do not store full payment credentials.',
+            'Payment method used (Cash on Delivery or bank transfer) — we do not store full payment credentials.',
             'Communications you send us via Facebook, email, or phone.',
           ],
         },
@@ -55,7 +55,7 @@ export default function PrivacyPolicyPage() {
           ],
           list: [
             'With delivery partners (couriers) to ship your orders — only the name, phone number, and shipping address are shared.',
-            'With payment providers (bKash, Nagad) to process your transaction securely.',
+            'With payment providers to process your transaction securely.',
             'When required by law, court order, or government authority.',
           ],
         },

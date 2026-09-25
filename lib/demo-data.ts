@@ -123,7 +123,7 @@ function generateDemoOrders(): Order[] {
       discount,
       total: subtotal + shipping - discount,
       coupon_code: discount > 0 ? 'SAVE10' : null,
-      payment_method: i % 3 === 0 ? 'cod' : i % 3 === 1 ? 'bkash' : 'nagad',
+      payment_method: i % 2 === 0 ? 'cod' : 'bank',
       payment_status: i < 4 ? 'paid' : 'pending',
       shipping_address: DEMO_ADDRESSES[0],
       notes: null,

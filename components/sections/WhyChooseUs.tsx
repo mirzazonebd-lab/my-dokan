@@ -25,7 +25,7 @@ const features = [
   {
     icon: CreditCard,
     title: 'Flexible Payment',
-    description: 'bKash, Nagad, Card, COD',
+    description: 'Bank transfer, card, COD',
   },
   {
     icon: MapPin,

@@ -51,7 +51,7 @@ export default function ShippingPolicyPage() {
           ],
           list: [
             'Order confirmation is sent immediately after placement.',
-            'For bKash and Nagad payments, the order is processed after payment verification (usually within 1–2 hours).',
+            'For advance payments, the order is processed after payment verification (usually within 1–2 hours).',
             'For Cash on Delivery, the order is confirmed via a phone call before dispatch.',
             'Once dispatched, you will receive a tracking number via SMS.',
           ],

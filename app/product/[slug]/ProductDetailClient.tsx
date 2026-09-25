@@ -365,8 +365,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { icon: Package, label: 'Cash on Delivery', desc: 'Pay when delivered', color: 'text-green-600 bg-green-50' },
-                  { icon: Smartphone, label: 'bKash', desc: '01XXXXXXXXX', color: 'text-pink-600 bg-pink-50' },
-                  { icon: CreditCard, label: 'Nagad', desc: '01XXXXXXXXX', color: 'text-orange-600 bg-orange-50' },
+                  { icon: CreditCard, label: 'Bank Transfer', desc: 'Secure transfer', color: 'text-slate-600 bg-slate-100' },
                 ].map(({ icon: Icon, label, desc, color }) => (
                   <div key={label} className="text-center p-2.5 bg-gray-50 rounded-xl">
                     <div className={`w-8 h-8 ${color} rounded-lg flex items-center justify-center mx-auto mb-1.5`}>

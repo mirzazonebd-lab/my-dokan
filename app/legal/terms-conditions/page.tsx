@@ -52,8 +52,7 @@ export default function TermsConditionsPage() {
           ],
           list: [
             'Cash on Delivery (COD) — pay in cash when your order arrives.',
-            'bKash — mobile financial service payment.',
-            'Nagad — mobile financial service payment.',
+            'Bank transfer — pay securely through our bank account details.',
           ],
         },
         {

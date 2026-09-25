@@ -64,8 +64,8 @@ export default function ReturnRefundPolicyPage() {
             'Once your return is approved and the product passes inspection, refunds are processed as follows:',
           ],
           list: [
-            'Refunds are issued to the original payment method (bKash, Nagad, or bank transfer).',
-            'For Cash on Delivery orders, refunds are sent via bKash or Nagad within 5–7 business days.',
+            'Refunds are issued to the original payment method (bank transfer or cash on delivery).',
+            'For Cash on Delivery orders, refunds are processed by our team within 5–7 business days.',
             'You may also choose store credit as an alternative refund method.',
             'Shipping charges are non-refundable unless the return is due to our error.',
           ],

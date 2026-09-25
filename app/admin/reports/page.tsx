@@ -137,8 +137,8 @@ export default function AdminReportsPage() {
             <div className="space-y-3">
               {[
                 { name: 'Cash on Delivery', value: 65, color: 'bg-green-500' },
-                { name: 'bKash', value: 20, color: 'bg-pink-500' },
-                { name: 'Nagad', value: 15, color: 'bg-orange-500' },
+                { name: 'Bank Transfer', value: 20, color: 'bg-pink-500' },
+                { name: 'Card', value: 15, color: 'bg-orange-500' },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <div className={`w-4 h-4 rounded ${item.color}`} />
