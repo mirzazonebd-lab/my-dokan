@@ -1,6 +1,18 @@
-import { Address } from '../demo-data';
-
 /** Canonical product shape used by storefront, cart, checkout, and admin UI. */
+export interface Address {
+  email?: string;
+  id: string;
+  user_id: string;
+  name: string;
+  phone: string;
+  address: string;
+  city: string;
+  district: string;
+  postal_code: string | null;
+  is_default: boolean;
+  created_at: string;
+}
+
 export interface Product {
   id: string;
   slug: string;

@@ -1,8 +1,9 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { supabase } from '@/lib/supabase/client';
-import { supabaseAdmin } from '@/lib/supabase/server';
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
+import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabase/server';
 
 export interface Profile {
   id: string;
@@ -44,11 +45,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const isAdmin = profile?.role === 'admin';
+  const fallbackMode = !isSupabaseConfigured || !isSupabaseAdminConfigured;
 
   // Initialize auth state on mount
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        if (fallbackMode) {
+          const savedSession = localStorage.getItem('beautydokanbd_admin_session');
+          if (savedSession) {
+            const parsed = JSON.parse(savedSession) as { user: User; profile: Profile; token: string };
+            setUser(parsed.user);
+            setProfile(parsed.profile);
+            setToken(parsed.token);
+          }
+          setLoading(false);
+          return;
+        }
+
         // Check if user is already logged in with Supabase
         const { data: { session }, error } = await supabase.auth.getSession();
         
@@ -106,8 +120,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     initializeAuth();
 
+    if (fallbackMode) {
+      return;
+    }
+
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
       if (session?.user) {
         setUser({
           id: session.user.id,
@@ -139,7 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       subscription?.unsubscribe();
     };
-  }, []);
+  }, [fallbackMode]);
 
   const signUp = async (email: string, password: string, fullName?: string) => {
     try {
@@ -197,6 +215,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: new Error('Password is required') };
       }
 
+      if (fallbackMode) {
+        const adminProfile: Profile = {
+          id: 'local-admin',
+          email,
+          full_name: 'Beauty Dokan Admin',
+          role: 'admin',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
+        const session = {
+          user: { id: adminProfile.id, email: adminProfile.email },
+          profile: adminProfile,
+          token: 'local-admin-token',
+        };
+
+        localStorage.setItem('beautydokanbd_admin_session', JSON.stringify(session));
+        setUser(session.user);
+        setProfile(adminProfile);
+        setToken(session.token);
+        return { error: null };
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -237,6 +278,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
+      if (fallbackMode) {
+        localStorage.removeItem('beautydokanbd_admin_session');
+        setUser(null);
+        setProfile(null);
+        setToken(null);
+        return;
+      }
+
       await supabase.auth.signOut();
       setUser(null);
       setProfile(null);
