@@ -32,7 +32,7 @@ export default function ContactPage() {
     {
       icon: <Phone size={22} />,
       title: 'Call Us',
-      lines: [SITE_INFO.phone, SITE_INFO.phone2],
+      lines: [SITE_INFO.phone, SITE_INFO.phone],
       color: 'bg-blue-50 text-blue-600',
     },
     {
