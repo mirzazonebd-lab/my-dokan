@@ -111,6 +111,7 @@ export default function AdminProductsPage() {
     const { error } = await supabase.from('products').delete().eq('id', id);
     if (error) {
       console.error('Delete failed:', error.message);
+      alert(`Error deleting product: ${error.message}`);
       return;
     }
     setProducts((prev) => prev.filter((p) => p.id !== id));
@@ -242,9 +243,8 @@ export default function AdminProductsPage() {
 
                       <td className="px-4 py-3 text-center">
                         <span
-                          className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            product.stock > 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-                          }`}
+                          className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${product.stock > 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+                            }`}
                         >
                           {product.stock}
                         </span>
@@ -259,9 +259,13 @@ export default function AdminProductsPage() {
                           >
                             <Eye size={16} />
                           </Link>
-                          <button type="button" className="text-gray-500 hover:text-[#C4818A] transition-colors" aria-label="Edit product">
+                          <Link
+                            href={`/admin/products/edit/${product.id}`}
+                            className="text-gray-500 hover:text-[#C4818A] transition-colors"
+                            aria-label="Edit product"
+                          >
                             <Pencil size={16} />
-                          </button>
+                          </Link>
                           <button
                             type="button"
                             onClick={() => handleDelete(product.id)}

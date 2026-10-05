@@ -5,10 +5,8 @@ import { Plus, Pencil, Search, Trash2, UserRound, Phone, Mail, MapPin, CheckCirc
 import AdminLayout from '../AdminShell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { readLocalStorage, writeLocalStorage, type SupplierRecord } from '@/lib/admin-data';
+import { type SupplierRecord } from '@/lib/admin-data';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
-
-const STORAGE_KEY = 'beautydokanbd_suppliers';
 
 const defaultSuppliers: SupplierRecord[] = [
   {
@@ -60,7 +58,12 @@ export default function AdminSuppliersPage() {
     const loadSuppliers = async () => {
       if (isSupabaseConfigured) {
         const { data, error } = await supabase.from('suppliers').select('*').order('created_at', { ascending: false });
-        if (!error && data?.length) {
+        if (error) {
+          console.error('Error fetching suppliers:', error);
+          alert(error.message);
+          return;
+        }
+        if (data?.length) {
           const mapped = data.map((supplier: any) => ({
             ...supplier,
             id: String(supplier.id),
@@ -74,13 +77,12 @@ export default function AdminSuppliersPage() {
           })) as SupplierRecord[];
 
           setSuppliers(mapped);
-          writeLocalStorage(STORAGE_KEY, mapped);
-          return;
+        } else {
+          setSuppliers([]);
         }
+      } else {
+        alert('Supabase is not configured.');
       }
-
-      const data = readLocalStorage<SupplierRecord[]>(STORAGE_KEY, defaultSuppliers);
-      setSuppliers(data.length ? data : defaultSuppliers);
     };
 
     loadSuppliers();
@@ -96,7 +98,6 @@ export default function AdminSuppliersPage() {
 
   const persistSuppliers = (next: SupplierRecord[]) => {
     setSuppliers(next);
-    writeLocalStorage(STORAGE_KEY, next);
   };
 
   const saveSupplierToDatabase = async (payload: Partial<SupplierRecord>) => {
@@ -123,6 +124,7 @@ export default function AdminSuppliersPage() {
 
     if (error) {
       console.error('Unable to save supplier to Supabase', error.message);
+      alert(`Database Error: ${error.message}`);
       return null;
     }
 
@@ -158,7 +160,8 @@ export default function AdminSuppliersPage() {
           : supplier
       );
       const saved = await saveSupplierToDatabase({ ...trimmed, id: editingId, active: trimmed.active });
-      persistSuppliers(saved ? next.map((supplier) => supplier.id === editingId ? { ...supplier, ...saved } : supplier) : next);
+      if (!saved) { alert('Failed to save to database. Record was not updated.'); return; }
+      persistSuppliers(next.map((supplier) => supplier.id === editingId ? { ...supplier, ...saved } : supplier));
     } else {
       const newId = crypto.randomUUID();
       const nextSupplier: SupplierRecord = {
@@ -169,7 +172,8 @@ export default function AdminSuppliersPage() {
         updated_at: new Date().toISOString(),
       };
       const saved = await saveSupplierToDatabase({ ...nextSupplier, id: newId, active: trimmed.active });
-      persistSuppliers(saved ? [saved as SupplierRecord, ...suppliers] : [nextSupplier, ...suppliers]);
+      if (!saved) { alert('Failed to save to database. Record was not created.'); return; }
+      persistSuppliers([saved as SupplierRecord, ...suppliers]);
     }
 
     resetForm();
@@ -272,9 +276,8 @@ export default function AdminSuppliersPage() {
                         <button
                           type="button"
                           onClick={() => toggleActive(supplier.id)}
-                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
-                            supplier.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-                          }`}
+                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${supplier.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                            }`}
                         >
                           {supplier.active ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
                           {supplier.active ? 'Active' : 'Inactive'}

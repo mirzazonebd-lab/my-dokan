@@ -119,6 +119,10 @@ export default function AdminCouponsPage() {
         if (response.ok) {
           const { data } = await response.json();
           setCoupons(coupons.map(c => c.id === editingCoupon.id ? data : c));
+          setIsSheetOpen(false);
+        } else {
+          const { error } = await response.json();
+          alert(`Error saving coupon: ${error}`);
         }
       } else {
         const response = await fetch('/api/admin/coupons', {
@@ -141,12 +145,15 @@ export default function AdminCouponsPage() {
         if (response.ok) {
           const { data } = await response.json();
           setCoupons([data, ...coupons]);
+          setIsSheetOpen(false);
+        } else {
+          const { error } = await response.json();
+          alert(`Error creating coupon: ${error}`);
         }
       }
-
-      setIsSheetOpen(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving coupon:', error);
+      alert(`Network error: ${error.message}`);
     }
   };
 
@@ -163,9 +170,13 @@ export default function AdminCouponsPage() {
 
         if (response.ok) {
           setCoupons(coupons.filter(c => c.id !== couponId));
+        } else {
+          const { error } = await response.json();
+          alert(`Error deleting coupon: ${error}`);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error deleting coupon:', error);
+        alert(`Network error: ${error.message}`);
       }
     }
   };

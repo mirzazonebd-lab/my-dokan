@@ -78,6 +78,10 @@ export default function AdminCategoriesPage() {
         if (response.ok) {
           const { data } = await response.json();
           setCategories(categories.map(c => c.id === editingCategory.id ? data : c));
+          setIsSheetOpen(false);
+        } else {
+          const { error } = await response.json();
+          alert(`Error saving category: ${error}`);
         }
       } else {
         const response = await fetch('/api/admin/categories', {
@@ -97,12 +101,15 @@ export default function AdminCategoriesPage() {
         if (response.ok) {
           const { data } = await response.json();
           setCategories([data, ...categories]);
+          setIsSheetOpen(false);
+        } else {
+          const { error } = await response.json();
+          alert(`Error creating category: ${error}`);
         }
       }
-
-      setIsSheetOpen(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving category:', error);
+      alert(`Network error: ${error.message}`);
     }
   };
 
@@ -119,9 +126,13 @@ export default function AdminCategoriesPage() {
 
         if (response.ok) {
           setCategories(categories.filter(c => c.id !== categoryId));
+        } else {
+          const { error } = await response.json();
+          alert(`Error deleting category: ${error}`);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error deleting category:', error);
+        alert(`Network error: ${error.message}`);
       }
     }
   };

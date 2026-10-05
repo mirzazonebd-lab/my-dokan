@@ -38,7 +38,7 @@ const DEFAULT_SETTINGS = {
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Step = 'cart' | 'info' | 'shipping' | 'payment' | 'review';
-type PaymentMethod = 'cod' | 'bank';
+type PaymentMethod = 'cod' | 'bank' | 'mobile';
 
 interface CustomerInfo {
   fullName: string;
@@ -92,8 +92,8 @@ function StepBar({ current }: { current: Step }) {
           <div key={s} className="flex items-center">
             <div className="flex flex-col items-center gap-1.5 min-w-[52px]">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${done ? 'bg-green-500 text-white' :
-                  active ? 'bg-[#C4818A] text-white ring-4 ring-[#C4818A]/20' :
-                    'bg-gray-200 text-gray-400'
+                active ? 'bg-[#C4818A] text-white ring-4 ring-[#C4818A]/20' :
+                  'bg-gray-200 text-gray-400'
                 }`}>
                 {done ? <Check size={14} /> : i + 1}
               </div>
@@ -183,7 +183,7 @@ function OrderSummary({
   showCoupon: boolean; payment: PaymentMethod; coupons: any[]; freeShippingThreshold: number;
 }) {
   const grandTotal = subtotal + shippingCost - discount;
-  const paymentLabel = payment === 'cod' ? 'Cash on Delivery' : 'Bank Transfer';
+  const paymentLabel = payment === 'cod' ? 'Cash on Delivery' : payment === 'bank' ? 'Bank Transfer' : 'Mobile Banking';
   const isFreeShipping = subtotal >= freeShippingThreshold;
 
   return (
@@ -424,7 +424,7 @@ function CheckoutContent() {
     return Object.keys(e).length === 0;
   };
 
-  const requiresAdvanceProof = payment === 'bank';
+  const requiresAdvanceProof = payment === 'bank' || payment === 'mobile';
   const validatePayment = (): boolean => {
     if (!requiresAdvanceProof) return true;
     if (!paymentInfo.transactionId.trim()) {
@@ -732,12 +732,27 @@ function CheckoutContent() {
                     description="Pay with cash when your order arrives at your door"
                   />
                   <PaymentOption value="bank" selected={payment} onSelect={setPayment} icon={<Landmark size={20} className="text-slate-600" />} iconBg="bg-slate-100" label="Bank Transfer" description="Transfer to our bank account and submit proof" />
+                  <PaymentOption value="mobile" selected={payment} onSelect={setPayment} icon={<Phone size={20} className="text-purple-600" />} iconBg="bg-purple-100" label="Mobile Banking (bKash, Nagad, etc.)" description="Send Money via bKash, Nagad, Rocket, Upay, MCash, or CellFin" />
                 </div>
 
                 {requiresAdvanceProof && (
                   <div className="rounded-xl p-4 mt-3 bg-rose-50 border border-rose-100">
                     <p className="text-sm font-semibold text-gray-900 mb-3">Advance Payment Details</p>
-                    <div className="text-xs text-gray-700 space-y-1 mb-4"><p><strong>Bank Name:</strong> Beauty Dokan BD Bank</p><p><strong>Account Name:</strong> Beauty Dokan BD</p><p><strong>Account Number:</strong> 1234567890</p><p><strong>Routing Number:</strong> [REDACTED]</p></div>
+                    <div className="text-xs text-gray-700 space-y-1 mb-4">
+                      {payment === 'mobile' ? (
+                        <>
+                          <p><strong>Mobile Banking (bKash, Nagad, Rocket, Upay, MCash, CellFin)</strong></p>
+                          <p><strong>Number:</strong> 01712012737 (Send Money)</p>
+                        </>
+                      ) : (
+                        <>
+                          <p><strong>Bank Name:</strong> Beauty Dokan BD Bank</p>
+                          <p><strong>Account Name:</strong> Beauty Dokan BD</p>
+                          <p><strong>Account Number:</strong> 1234567890</p>
+                          <p><strong>Routing Number:</strong> [REDACTED]</p>
+                        </>
+                      )}
+                    </div>
                     <div className="grid sm:grid-cols-2 gap-3"><Field label="Transaction ID" required><Input value={paymentInfo.transactionId} onChange={e => setPaymentInfo(p => ({ ...p, transactionId: e.target.value }))} placeholder="Enter transaction ID" /></Field><Field label="Payment Screenshot"><label className="flex h-10 items-center gap-2 rounded-lg border border-dashed border-gray-300 px-3 cursor-pointer hover:border-[#C4818A] transition-colors text-xs text-gray-600"><Upload size={15} /> {paymentInfo.screenshotName || 'Upload JPG, PNG or PDF'}<input type="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" className="sr-only" onChange={e => handleScreenshot(e.target.files?.[0])} /></label></Field></div>
                   </div>
                 )}
@@ -778,7 +793,7 @@ function CheckoutContent() {
                   onEdit={() => setStep('payment')}
                 >
                   <p className="font-medium text-gray-900">
-                    {payment === 'cod' ? 'Cash on Delivery' : 'Bank Transfer'}
+                    {payment === 'cod' ? 'Cash on Delivery' : payment === 'bank' ? 'Bank Transfer' : 'Mobile Banking'}
                   </p>
                   {paymentInfo.transactionId && <p className="text-xs text-gray-500 mt-1">Transaction ID: {paymentInfo.transactionId}</p>}
                 </ReviewBlock>

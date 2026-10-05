@@ -5,10 +5,7 @@ import { Truck, MapPinned, ShieldCheck } from 'lucide-react';
 import AdminLayout from '../AdminShell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { readLocalStorage, writeLocalStorage } from '@/lib/admin-data';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
-
-const STORAGE_KEY = 'beautydokanbd_admin_settings';
 
 const defaultSettings = {
   storeName: 'Beauty Dokan BD',
@@ -35,7 +32,13 @@ export default function AdminShippingPage() {
           .select('*')
           .in('setting_key', ['inside_dhaka_shipping_fee', 'outside_dhaka_shipping_fee', 'free_shipping_threshold']);
 
-        if (!error && data?.length) {
+        if (error) {
+          console.error(error);
+          alert(`Error loading settings: ${error.message}`);
+          return;
+        }
+
+        if (data?.length) {
           const map = Object.fromEntries(data.map((item: { setting_key: any; setting_value: any; }) => [item.setting_key, item.setting_value]));
           const next = {
             ...defaultSettings,
@@ -45,18 +48,10 @@ export default function AdminShippingPage() {
             deliveryCharge: Number(map.inside_dhaka_shipping_fee?.shipping_fee ?? defaultSettings.insideDhakaShipping),
           };
           setSettings(next);
-          writeLocalStorage(STORAGE_KEY, next);
-          return;
         }
+      } else {
+        alert('Supabase is not configured.');
       }
-
-      const existing = readLocalStorage<typeof defaultSettings>(STORAGE_KEY, defaultSettings);
-      setSettings({
-        ...defaultSettings,
-        ...existing,
-        insideDhakaShipping: existing.insideDhakaShipping ?? existing.deliveryCharge ?? 60,
-        outsideDhakaShipping: existing.outsideDhakaShipping ?? (existing.deliveryCharge ? existing.deliveryCharge * 2 : 120),
-      });
     };
 
     loadSettings();
@@ -69,7 +64,6 @@ export default function AdminShippingPage() {
       freeShippingThreshold: Number(settings.freeShippingThreshold || 0),
     };
     setSettings(normalized);
-    writeLocalStorage(STORAGE_KEY, normalized);
 
     if (isSupabaseConfigured) {
       await supabase.from('settings').upsert({

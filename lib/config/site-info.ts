@@ -10,7 +10,7 @@ export const SITE_INFO = {
   description: "Bangladesh's trusted destination for authentic Korean skincare and global beauty brands.",
   email: 'info@beautydokan.com',
   phone: '+8809638758429',
-  location: 'Dhaka, Bangladesh',
+  location: 'Noapara, Abhaynagar, Jashore, Bangladesh',
 
   // Delivery & Shipping
   deliveryInfo: {
@@ -35,13 +35,13 @@ export const SITE_INFO = {
   social: {
     facebook: 'https://facebook.com/beautydokanbd',
     instagram: 'https://instagram.com/beautydokanbd',
-    whatsapp: '+8809638758429',
+    whatsapp: '+8801797502155',
     youtube: 'https://youtube.com/beautydokanbd',
   },
 
   // Payment Methods
-  paymentMethods: ['Bank Transfer', 'Card', 'Cash on Delivery'],
-  paymentMethodsText: 'Bank transfer, card, or cash on delivery',
+  paymentMethods: ['bKash', 'Nagad', 'Rocket', 'Upay', 'MCash', 'CellFin', 'Bank Transfer', 'Card', 'Cash on Delivery'],
+  paymentMethodsText: 'bKash, Nagad, Rocket, Upay, MCash, CellFin, Bank transfer, card, or cash on delivery',
 
   // Featured Brands
   featuredBrands: ['COSRX', 'Laneige', 'Some By Mi', 'Innisfree', 'Klairs'],
@@ -58,7 +58,7 @@ export const SITE_INFO = {
     '⚡ Flash Sale — up to 45% OFF on K-Beauty',
     '✨ New arrivals from COSRX, Laneige & Klairs',
     '🇰🇷 Authentic Korean skincare imported directly',
-    '💳 Pay with bank transfer, card, or cash on delivery',
+    '💳 Pay with bKash, Nagad, Bank transfer, or COD',
     '🚚 Delivering to all 64 districts of Bangladesh',
     '⭐ Rated 4.8/5 by 19,000+ happy customers',
     '🎁 Buy 3 Get 1 Free Special Gift for 7 Days',

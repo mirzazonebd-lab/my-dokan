@@ -1,30 +1,20 @@
--- Create products table
-CREATE TABLE IF NOT EXISTS public.products (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
-  slug TEXT UNIQUE NOT NULL,
-  description TEXT,
-  price DECIMAL(10, 2) NOT NULL,
-  compare_price DECIMAL(10, 2),
-  stock INTEGER DEFAULT 0,
-  image TEXT,
-  category TEXT,
-  brand TEXT,
-  badge TEXT,
-  featured BOOLEAN DEFAULT false,
-  active BOOLEAN DEFAULT true,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+-- 1. Alter the products table to match the new schema constraints
+-- Safely convert text ID to UUID, drop NOT NULLs, add badge column
+ALTER TABLE public.products 
+  ALTER COLUMN id DROP DEFAULT,
+  ALTER COLUMN id TYPE UUID USING id::uuid,
+  ALTER COLUMN id SET DEFAULT gen_random_uuid(),
+  ALTER COLUMN category DROP NOT NULL,
+  ALTER COLUMN brand DROP NOT NULL,
+  ADD COLUMN IF NOT EXISTS badge TEXT;
 
--- Create indexes
-CREATE INDEX IF NOT EXISTS idx_products_category ON public.products(category);
-CREATE INDEX IF NOT EXISTS idx_products_brand ON public.products(brand);
-CREATE INDEX IF NOT EXISTS idx_products_slug ON public.products(slug);
+-- 2. Drop the old insecure permissive policies established in 20260716
+DROP POLICY IF EXISTS "select_products" ON public.products;
+DROP POLICY IF EXISTS "insert_products" ON public.products;
+DROP POLICY IF EXISTS "update_products" ON public.products;
+DROP POLICY IF EXISTS "delete_products" ON public.products;
 
--- Enable RLS
-ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
-
+-- 3. Recreate the precise secure RLS policies intended by the original 20260722 requirements
 -- RLS Policy: Everyone can read products
 CREATE POLICY "Anyone can read products"
   ON public.products

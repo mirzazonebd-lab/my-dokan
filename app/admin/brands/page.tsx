@@ -80,6 +80,10 @@ export default function AdminBrandsPage() {
         if (response.ok) {
           const { data } = await response.json();
           setBrands(brands.map(b => b.id === editingBrand.id ? data : b));
+          setIsSheetOpen(false);
+        } else {
+          const { error } = await response.json();
+          alert(`Error saving brand: ${error}`);
         }
       } else {
         const response = await fetch('/api/admin/brands', {
@@ -102,12 +106,15 @@ export default function AdminBrandsPage() {
         if (response.ok) {
           const { data } = await response.json();
           setBrands([data, ...brands]);
+          setIsSheetOpen(false);
+        } else {
+          const { error } = await response.json();
+          alert(`Error creating brand: ${error}`);
         }
       }
-
-      setIsSheetOpen(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving brand:', error);
+      alert(`Network error: ${error.message}`);
     }
   };
 
@@ -124,9 +131,13 @@ export default function AdminBrandsPage() {
 
         if (response.ok) {
           setBrands(brands.filter(b => b.id !== brandId));
+        } else {
+          const { error } = await response.json();
+          alert(`Error deleting brand: ${error}`);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error deleting brand:', error);
+        alert(`Network error: ${error.message}`);
       }
     }
   };

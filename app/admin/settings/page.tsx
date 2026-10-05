@@ -23,35 +23,73 @@ export default function AdminSettingsPage() {
 
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
+  const auth = require('@/components/auth/AuthProvider').useAuth();
 
-  // Load settings from localStorage on mount
   useEffect(() => {
-    const storedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
-    if (storedSettings) {
+    const fetchSettings = async () => {
       try {
-        const parsed = JSON.parse(storedSettings);
-        setSettings(parsed);
-      } catch {
-        // Use defaults if parse fails
+        const res = await fetch('/api/admin/settings');
+        if (res.ok) {
+          const { data } = await res.json();
+          if (data && Object.keys(data).length > 0) {
+            setSettings(prev => ({
+              ...prev,
+              storeName: data.store_name ?? prev.storeName,
+              storeEmail: data.store_email ?? prev.storeEmail,
+              storePhone: data.store_phone ?? prev.storePhone,
+              freeShippingThreshold: data.free_shipping_threshold ?? prev.freeShippingThreshold,
+              deliveryCharge: data.delivery_charge ?? prev.deliveryCharge,
+              codEnabled: data.cod_enabled ?? prev.codEnabled,
+              emailNotifications: data.email_notifications ?? prev.emailNotifications,
+              orderConfirmationSMS: data.order_confirmation_sms ?? prev.orderConfirmationSMS,
+            }));
+          }
+        }
+      } catch (e) {
+        console.error('Error fetching settings:', e);
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+    fetchSettings();
   }, []);
 
   const handleSaveSettings = async () => {
     setLoading(true);
-    
-    // Simulate save delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      const updates = [
+        { key: 'store_name', value: settings.storeName },
+        { key: 'store_email', value: settings.storeEmail },
+        { key: 'store_phone', value: settings.storePhone },
+        { key: 'free_shipping_threshold', value: settings.freeShippingThreshold },
+        { key: 'delivery_charge', value: settings.deliveryCharge },
+        { key: 'cod_enabled', value: settings.codEnabled },
+        { key: 'email_notifications', value: settings.emailNotifications },
+        { key: 'order_confirmation_sms', value: settings.orderConfirmationSMS },
+      ];
 
-    // Save to localStorage
-    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
-    
-    setSaved(true);
+      const promises = updates.map(u => fetch('/api/admin/settings', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-system-key': process.env.NEXT_PUBLIC_SYSTEM_API_KEY || '',
+          'Authorization': `Bearer ${auth.token}`,
+        },
+        body: JSON.stringify(u)
+      }));
+
+      const results = await Promise.all(promises);
+      const failed = results.find(r => !r.ok);
+      if (failed) {
+        const err = await failed.json();
+        alert(`Error saving settings: ${err.error || 'Unknown database error'}`);
+      } else {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      }
+    } catch (error: any) {
+      alert(`Network error: ${error.message}`);
+    }
     setLoading(false);
-
-    // Hide success message after 3 seconds
-    setTimeout(() => setSaved(false), 3000);
   };
 
   if (loading) {
@@ -195,7 +233,7 @@ export default function AdminSettingsPage() {
         </div>
 
         <div className="flex justify-end">
-          <Button 
+          <Button
             onClick={handleSaveSettings}
             disabled={loading}
             className="bg-[#C4818A] hover:bg-[#B06E77]"

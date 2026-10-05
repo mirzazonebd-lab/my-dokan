@@ -32,12 +32,37 @@ export default function AddProductPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      console.log('Product data:', formData);
-      alert('Product added successfully!');
-      router.push('/admin/products');
-    } catch (error) {
+      const response = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-system-key': process.env.NEXT_PUBLIC_SYSTEM_API_KEY || '',
+          'Authorization': `Bearer ${localStorage.getItem('supabase-auth-token')}` // Temporary, assume auth handled
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          slug: formData.name.toLowerCase().replace(/[\s_]+/g, '-'),
+          price: Number(formData.price),
+          compare_price: formData.originalPrice ? Number(formData.originalPrice) : null,
+          category: formData.category,
+          brand: formData.brand,
+          stock: Number(formData.stock),
+          image: formData.image,
+          description: formData.description,
+          badge: formData.badge === 'none' ? null : formData.badge,
+        }),
+      });
+
+      if (response.ok) {
+        alert('Product added successfully!');
+        router.push('/admin/products');
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to add product: ${errorData.error || 'Unknown error'}`);
+      }
+    } catch (error: any) {
       console.error('Error adding product:', error);
-      alert('Failed to add product');
+      alert(`Network error: ${error.message || 'Failed to add product'}`);
     } finally {
       setLoading(false);
     }
