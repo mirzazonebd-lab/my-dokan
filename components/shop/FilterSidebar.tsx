@@ -107,9 +107,9 @@ function CheckItem({
 }
 
 // Compute counts from all products
-const allCategories = Array.from(new Set(products.map(p => p.category))).sort();
-const allBrands = Array.from(new Set(products.map(p => p.brand))).sort();
-const allSkinTypes = Array.from(new Set(products.flatMap(p => p.skinType))).sort();
+const allCategories = Array.from(new Set(products.map(p => p.category).filter((c): c is string => c !== null))).sort();
+const allBrands = Array.from(new Set(products.map(p => p.brand).filter((b): b is string => b !== null))).sort();
+const allSkinTypes = Array.from(new Set(products.flatMap(p => (p.skinType ? [p.skinType] : [])).filter((t): t is string => t !== undefined))).sort();
 
 function getCategoryCount(cat: string) {
   return products.filter(p => p.category === cat).length;

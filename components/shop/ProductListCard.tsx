@@ -33,7 +33,7 @@ export default function ProductListCard({ product, onQuickView }: ProductListCar
       {/* Image */}
       <div className="relative w-full sm:w-52 md:w-64 aspect-square sm:aspect-auto flex-shrink-0 bg-rose-50 overflow-hidden">
         <Image
-          src={imageError ? 'https://images.pexels.com/photos/3762875/pexels-photo-3762875.jpeg?auto=compress&cs=tinysrgb&w=500' : product.image}
+          src={imageError ? 'https://images.pexels.com/photos/3762875/pexels-photo-3762875.jpeg?auto=compress&cs=tinysrgb&w=500' : product.image || '/placeholder.png'}
           alt={product.name}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -109,7 +109,7 @@ export default function ProductListCard({ product, onQuickView }: ProductListCar
                     key={i}
                     size={13}
                     className={
-                      i < Math.round(product.rating)
+                      i < Math.round(product.rating ?? 0)
                         ? 'text-yellow-400 fill-yellow-400'
                         : 'text-gray-200 fill-gray-200'
                     }
@@ -117,7 +117,7 @@ export default function ProductListCard({ product, onQuickView }: ProductListCar
                 ))}
               </div>
               <span className="text-xs font-semibold text-gray-700">{product.rating}</span>
-              <span className="text-xs text-gray-400">({product.totalReviews.toLocaleString()})</span>
+              <span className="text-xs text-gray-400">({(product.totalReviews ?? 0).toLocaleString()})</span>
             </div>
 
             {/* Description */}

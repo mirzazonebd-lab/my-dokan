@@ -31,8 +31,6 @@ const DEFAULT_SETTINGS = {
   freeShippingThreshold: 2026,
   deliveryCharge: 60,
   codEnabled: true,
-  bkashEnabled: true,
-  nagadEnabled: true,
   emailNotifications: true,
   orderConfirmationSMS: true,
 };
@@ -40,7 +38,7 @@ const DEFAULT_SETTINGS = {
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Step = 'cart' | 'info' | 'shipping' | 'payment' | 'review';
-type PaymentMethod = 'cod' | 'bkash' | 'nagad' | 'rocket' | 'bank';
+type PaymentMethod = 'cod' | 'bank';
 
 interface CustomerInfo {
   fullName: string;
@@ -185,7 +183,7 @@ function OrderSummary({
   showCoupon: boolean; payment: PaymentMethod; coupons: any[]; freeShippingThreshold: number;
 }) {
   const grandTotal = subtotal + shippingCost - discount;
-  const paymentLabel = payment === 'cod' ? 'Cash on Delivery' : payment === 'bkash' ? 'bKash' : payment === 'nagad' ? 'Nagad' : payment === 'rocket' ? 'Rocket' : 'Bank Transfer';
+  const paymentLabel = payment === 'cod' ? 'Cash on Delivery' : 'Bank Transfer';
   const isFreeShipping = subtotal >= freeShippingThreshold;
 
   return (
@@ -426,11 +424,11 @@ function CheckoutContent() {
     return Object.keys(e).length === 0;
   };
 
-  const requiresAdvanceProof = payment !== 'cod';
+  const requiresAdvanceProof = payment === 'bank';
   const validatePayment = (): boolean => {
     if (!requiresAdvanceProof) return true;
     if (!paymentInfo.transactionId.trim()) {
-      toast.error('Transaction ID is required for advance payment.');
+      toast.error('Transaction ID is required for bank transfer payment.');
       return false;
     }
     return true;
@@ -490,10 +488,10 @@ function CheckoutContent() {
           zone: isDhaka(ship.district) ? 'dhaka' : 'outside_dhaka',
         },
         items: items.map(item => ({
-          id: `item-${Date.now()}-${item.product_id}`,
-          product_id: item.product_id,
+          id: `item-${Date.now()}-${item.product.id}`,
+          product_id: item.product.id,
           product_name: item.product.name,
-          product_image: item.product.image,
+          product_image: item.product.image || '/placeholder.png',
           brand: item.product.brand,
           price: item.product.price,
           quantity: item.quantity,
@@ -569,9 +567,9 @@ function CheckoutContent() {
               <Card icon={<ShoppingBag size={16} className="text-[#C4818A]" />} title="Your Cart">
                 <div className="space-y-4">
                   {items.map(item => (
-                    <div key={item.product_id} className="flex gap-4 items-center">
+                    <div key={item.product.id} className="flex gap-4 items-center">
                       <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-rose-50 flex-shrink-0">
-                        <Image src={item.product.image} alt={item.product.name} fill className="object-cover" />
+                        <Image src={item.product.image || '/placeholder.png'} alt={item.product.name} fill className="object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-[#C4818A] font-medium">{item.product.brand}</p>
@@ -733,48 +731,13 @@ function CheckoutContent() {
                     label="Cash on Delivery"
                     description="Pay with cash when your order arrives at your door"
                   />
-                  <PaymentOption
-                    value="bkash" selected={payment} onSelect={setPayment}
-                    icon={<span className="font-extrabold text-sm text-pink-600">bKash</span>}
-                    iconBg="bg-pink-50"
-                    label="bKash (Manual)"
-                    description="Send payment to our bKash number, then confirm"
-                  />
-                  <PaymentOption
-                    value="nagad" selected={payment} onSelect={setPayment}
-                    icon={<span className="font-extrabold text-sm text-orange-600">Nagad</span>}
-                    iconBg="bg-orange-50"
-                    label="Nagad (Manual)"
-                    description="Send payment to our Nagad number, then confirm"
-                  />
-                  <PaymentOption value="rocket" selected={payment} onSelect={setPayment} icon={<span className="font-extrabold text-sm text-violet-700">Rocket</span>} iconBg="bg-violet-50" label="Rocket" description="Pay by Rocket and submit your transaction ID" />
                   <PaymentOption value="bank" selected={payment} onSelect={setPayment} icon={<Landmark size={20} className="text-slate-600" />} iconBg="bg-slate-100" label="Bank Transfer" description="Transfer to our bank account and submit proof" />
                 </div>
-
-                {/* Manual payment instructions */}
-                {(payment === 'bkash' || payment === 'nagad') && (
-                  <div className={`rounded-xl p-4 mt-3 ${payment === 'bkash' ? 'bg-pink-50 border border-pink-100' : 'bg-orange-50 border border-orange-100'
-                    }`}>
-                    <p className="text-sm font-semibold text-gray-900 mb-1">Payment Instructions</p>
-                    <ol className="text-xs text-gray-600 space-y-1 list-decimal list-inside">
-                      <li>
-                        Send <strong>৳{grandTotal.toLocaleString()}</strong> to{' '}
-                        <strong className={payment === 'bkash' ? 'text-pink-700' : 'text-orange-700'}>
-                          01712-012737
-                        </strong>{' '}
-                        ({payment === 'bkash' ? 'bKash' : 'Nagad'})
-                      </li>
-                      <li>Use <strong>Send Money</strong>, not payment</li>
-                      <li>Note the transaction ID after payment</li>
-                      <li>Your order will be confirmed once payment is verified</li>
-                    </ol>
-                  </div>
-                )}
 
                 {requiresAdvanceProof && (
                   <div className="rounded-xl p-4 mt-3 bg-rose-50 border border-rose-100">
                     <p className="text-sm font-semibold text-gray-900 mb-3">Advance Payment Details</p>
-                    {payment === 'bank' ? <div className="text-xs text-gray-700 space-y-1 mb-4"><p><strong>Bank Name:</strong> Beauty Dokan BD Bank</p><p><strong>Account Name:</strong> Beauty Dokan BD</p><p><strong>Account Number:</strong> 1234567890</p><p><strong>Routing Number:</strong> [REDACTED]</p></div> : <p className="text-xs text-gray-700 mb-4"><strong>Merchant Number:</strong> 01712-012737 ({payment === 'bkash' ? 'bKash' : payment === 'nagad' ? 'Nagad' : 'Rocket'})</p>}
+                    <div className="text-xs text-gray-700 space-y-1 mb-4"><p><strong>Bank Name:</strong> Beauty Dokan BD Bank</p><p><strong>Account Name:</strong> Beauty Dokan BD</p><p><strong>Account Number:</strong> 1234567890</p><p><strong>Routing Number:</strong> [REDACTED]</p></div>
                     <div className="grid sm:grid-cols-2 gap-3"><Field label="Transaction ID" required><Input value={paymentInfo.transactionId} onChange={e => setPaymentInfo(p => ({ ...p, transactionId: e.target.value }))} placeholder="Enter transaction ID" /></Field><Field label="Payment Screenshot"><label className="flex h-10 items-center gap-2 rounded-lg border border-dashed border-gray-300 px-3 cursor-pointer hover:border-[#C4818A] transition-colors text-xs text-gray-600"><Upload size={15} /> {paymentInfo.screenshotName || 'Upload JPG, PNG or PDF'}<input type="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" className="sr-only" onChange={e => handleScreenshot(e.target.files?.[0])} /></label></Field></div>
                   </div>
                 )}
@@ -815,7 +778,7 @@ function CheckoutContent() {
                   onEdit={() => setStep('payment')}
                 >
                   <p className="font-medium text-gray-900">
-                    {payment === 'cod' ? 'Cash on Delivery' : payment === 'bkash' ? 'bKash' : payment === 'nagad' ? 'Nagad' : payment === 'rocket' ? 'Rocket' : 'Bank Transfer'}
+                    {payment === 'cod' ? 'Cash on Delivery' : 'Bank Transfer'}
                   </p>
                   {paymentInfo.transactionId && <p className="text-xs text-gray-500 mt-1">Transaction ID: {paymentInfo.transactionId}</p>}
                 </ReviewBlock>
@@ -834,9 +797,9 @@ function CheckoutContent() {
                   </div>
                   <div className="space-y-3">
                     {items.map(item => (
-                      <div key={item.product_id} className="flex gap-3 items-center">
+                      <div key={item.product.id} className="flex gap-3 items-center">
                         <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-rose-50 flex-shrink-0">
-                          <Image src={item.product.image} alt={item.product.name} fill className="object-cover" />
+                          <Image src={item.product.image || '/placeholder.png'} alt={item.product.name} fill className="object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-[#C4818A] font-medium">{item.product.brand}</p>

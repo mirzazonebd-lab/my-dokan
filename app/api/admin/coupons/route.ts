@@ -9,7 +9,7 @@ import {
 
 export const runtime = 'nodejs';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     await requireSmsAuthorization(request);
     const coupons = await getCouponsFromDB();

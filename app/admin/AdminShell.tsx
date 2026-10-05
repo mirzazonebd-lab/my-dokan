@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LayoutDashboard, Package, ShoppingBag, Layers, Tag, Warehouse, Ticket, Users, ChartBar as BarChart3, FileText, Settings, LogOut, ChevronDown, Menu, X, Bell } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, Layers, Tag, Warehouse, Ticket, Users, ChartBar as BarChart3, FileText, Settings, LogOut, ChevronDown, Menu, X, Bell, Truck } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 
 interface NavItem {
@@ -19,6 +19,8 @@ const navItems: NavItem[] = [
   { id: 'products', label: 'Products', icon: <ShoppingBag size={20} />, href: '/admin/products' },
   { id: 'categories', label: 'Categories', icon: <Layers size={20} />, href: '/admin/categories' },
   { id: 'brands', label: 'Brands', icon: <Tag size={20} />, href: '/admin/brands' },
+  { id: 'suppliers', label: 'Suppliers', icon: <Warehouse size={20} />, href: '/admin/suppliers' },
+  { id: 'shipping', label: 'Shipping', icon: <Truck size={20} />, href: '/admin/shipping' },
   { id: 'inventory', label: 'Inventory', icon: <Warehouse size={20} />, href: '/admin/inventory' },
   { id: 'coupons', label: 'Coupons', icon: <Ticket size={20} />, href: '/admin/coupons' },
   { id: 'customers', label: 'Customers', icon: <Users size={20} />, href: '/admin/customers' },

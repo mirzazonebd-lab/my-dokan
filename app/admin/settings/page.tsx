@@ -13,12 +13,10 @@ export default function AdminSettingsPage() {
   const [settings, setSettings] = useState({
     storeName: 'Beauty Dokan BD',
     storeEmail: 'info@beautydokan.com',
-    storePhone: '+8801712012737',
+    storePhone: '+8809638758429',
     freeShippingThreshold: 2026,
     deliveryCharge: 60,
     codEnabled: true,
-    bkashEnabled: true,
-    nagadEnabled: true,
     emailNotifications: true,
     orderConfirmationSMS: true,
   });
@@ -160,30 +158,6 @@ export default function AdminSettingsPage() {
                 <Switch
                   checked={settings.codEnabled}
                   onCheckedChange={checked => setSettings({ ...settings, codEnabled: checked })}
-                />
-              </div>
-              <div className="flex items-center justify-between p-3 border border-gray-100 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-pink-100 rounded flex items-center justify-center">
-                    <span className="text-pink-600 text-xs font-bold">bK</span>
-                  </div>
-                  <span>bKash</span>
-                </div>
-                <Switch
-                  checked={settings.bkashEnabled}
-                  onCheckedChange={checked => setSettings({ ...settings, bkashEnabled: checked })}
-                />
-              </div>
-              <div className="flex items-center justify-between p-3 border border-gray-100 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-orange-100 rounded flex items-center justify-center">
-                    <span className="text-orange-600 text-xs font-bold">N</span>
-                  </div>
-                  <span>Nagad</span>
-                </div>
-                <Switch
-                  checked={settings.nagadEnabled}
-                  onCheckedChange={checked => setSettings({ ...settings, nagadEnabled: checked })}
                 />
               </div>
             </div>

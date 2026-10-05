@@ -34,7 +34,7 @@ export default function CategoryPage({ params }: Props) {
   if (!category) notFound();
 
   const categoryProducts = products.filter(p =>
-    p.category.toLowerCase() === category.name.toLowerCase()
+    (p.category || '').toLowerCase() === category.name.toLowerCase()
   );
 
   return (

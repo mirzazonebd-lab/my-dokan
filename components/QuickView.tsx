@@ -41,7 +41,7 @@ export default function QuickView({ product, open, onOpenChange }: QuickViewProp
           <div className="p-6 bg-gray-50">
             <div className="relative aspect-square rounded-xl overflow-hidden bg-white">
               <Image
-                src={product.image}
+                src={product.image || '/placeholder.png'}
                 alt={product.name}
                 fill
                 className="object-cover"
@@ -54,9 +54,9 @@ export default function QuickView({ product, open, onOpenChange }: QuickViewProp
             </div>
 
             {/* Thumbnails from gallery */}
-            {product.gallery.length > 1 && (
+            {(product.gallery ?? []).length > 1 && (
               <div className="flex gap-2 mt-4 justify-center">
-                {product.gallery.slice(0, 4).map((img, i) => (
+                {(product.gallery ?? []).slice(0, 4).map((img, i) => (
                   <button
                     key={i}
                     onClick={() => setSelectedImage(i)}
@@ -80,9 +80,11 @@ export default function QuickView({ product, open, onOpenChange }: QuickViewProp
 
           {/* Product Details */}
           <div className="p-6">
-            <Link href={`/brand/${product.brand.toLowerCase().replace(/\s+/g, '-')}`} className="text-sm text-[#C4818A] font-medium hover:underline">
-              {product.brand}
-            </Link>
+            {product.brand && (
+              <Link href={`/brand/${product.brand.toLowerCase().replace(/\s+/g, '-')}`} className="text-sm text-[#C4818A] font-medium hover:underline">
+                {product.brand}
+              </Link>
+            )}
 
             <Link href={`/product/${product.slug}`}>
               <h2 className="text-xl font-bold text-gray-900 mt-1 hover:text-[#C4818A] transition-colors">
@@ -97,12 +99,12 @@ export default function QuickView({ product, open, onOpenChange }: QuickViewProp
                   <Star
                     key={i}
                     size={14}
-                    className={i < Math.floor(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                    className={i < Math.floor(product.rating ?? 0) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
                   />
                 ))}
               </div>
-              <span className="text-sm text-gray-600">{product.rating}</span>
-              <span className="text-sm text-gray-400">({product.totalReviews.toLocaleString()} reviews)</span>
+              <span className="text-sm text-gray-600">{product.rating ?? 0}</span>
+              <span className="text-sm text-gray-400">({(product.totalReviews ?? 0).toLocaleString()} reviews)</span>
             </div>
 
             {/* Price */}
@@ -110,11 +112,11 @@ export default function QuickView({ product, open, onOpenChange }: QuickViewProp
               <span className="text-2xl font-bold text-gray-900">
                 ৳{product.price.toLocaleString()}
               </span>
-              {product.originalPrice && (
+              {product.originalPrice ? (
                 <span className="text-lg text-gray-400 line-through">
                   ৳{product.originalPrice.toLocaleString()}
                 </span>
-              )}
+              ) : null}
             </div>
 
             {/* Stock Status */}
@@ -128,7 +130,7 @@ export default function QuickView({ product, open, onOpenChange }: QuickViewProp
 
             {/* Description */}
             <p className="text-sm text-gray-600 mt-4 line-clamp-3">
-              {product.shortDescription}
+              {product.shortDescription || ''}
             </p>
 
             {/* Skin Type */}

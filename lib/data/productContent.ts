@@ -11,8 +11,8 @@ export interface ProductContent {
 }
 
 export function getProductContent(product: Product): ProductContent {
-  const cat = product.category.toLowerCase();
-  const sub = product.category.toLowerCase();
+  const cat = (product.category || '').toLowerCase();
+  const sub = (product.category || '').toLowerCase();
   const isKorean = product.category === 'Korean Skincare';
 
   // Ingredients by type

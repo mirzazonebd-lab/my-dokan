@@ -6,6 +6,7 @@ import { Package, ShoppingBag, Users, DollarSign, TrendingUp, TrendingDown, Arro
 import { DEMO_ORDERS, DEMO_DASHBOARD_STATS, DEMO_CUSTOMER_STATS } from '@/lib/demo-data';
 import AdminLayout from './AdminShell';
 import { products } from '@/lib/data/products';
+import { getLowStockProducts, readLocalStorage } from '@/lib/admin-data';
 
 function BarChart({ data, title }: { data: { name: string; value: number }[]; title: string }) {
   const max = Math.max(...data.map(d => d.value));
@@ -65,11 +66,27 @@ export default function AdminDashboard() {
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
 
   useEffect(() => {
-    // Use demo data for stats
-    setStats(DEMO_DASHBOARD_STATS);
+    const storedOrders = readLocalStorage<any[]>('beautydokanbd_orders', DEMO_ORDERS);
+    const localOrders = storedOrders.length ? storedOrders : DEMO_ORDERS;
+    const totalRevenue = localOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+    const pendingOrders = localOrders.filter((order) => String(order.status).toLowerCase() === 'pending').length;
+    const deliveredOrders = localOrders.filter((order) => String(order.status).toLowerCase() === 'delivered').length;
+    const totalProducts = products.length;
+    const lowStockProducts = getLowStockProducts(products as any[]).length;
 
-    // Get recent orders from demo data
-    const recent = DEMO_ORDERS.slice(0, 5);
+    setStats({
+      totalOrders: localOrders.length,
+      totalRevenue,
+      totalProducts,
+      totalCustomers: Math.max(1, localOrders.length),
+      pendingOrders,
+      processingOrders: localOrders.filter((order) => String(order.status).toLowerCase() === 'processing').length,
+      shippedOrders: localOrders.filter((order) => String(order.status).toLowerCase() === 'shipped').length,
+      deliveredOrders,
+      lowStockProducts,
+    } as any);
+
+    const recent = localOrders.slice(0, 5);
     setRecentOrders(recent);
   }, []);
 

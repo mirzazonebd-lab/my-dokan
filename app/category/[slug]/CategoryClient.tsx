@@ -41,11 +41,11 @@ export default function CategoryClient({ category, products: initialProducts }: 
     let result = [...initialProducts];
 
     if (selectedBrands.length > 0) {
-      result = result.filter(p => selectedBrands.includes(p.brand));
+      result = result.filter(p => p.brand !== null && selectedBrands.includes(p.brand));
     }
     result = result.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
     if (minRating > 0) {
-      result = result.filter(p => p.rating >= minRating);
+      result = result.filter(p => (p.rating ?? 0) >= minRating);
     }
     if (inStockOnly) {
       result = result.filter(p => p.stockStatus === 'in_stock');
@@ -65,7 +65,7 @@ export default function CategoryClient({ category, products: initialProducts }: 
         result.sort((a, b) => b.price - a.price);
         break;
       case 'rating':
-        result.sort((a, b) => b.rating - a.rating);
+        result.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
         break;
       case 'newest':
         result.sort((a, b) => (b.badge === 'New' ? 1 : 0) - (a.badge === 'New' ? 1 : 0));

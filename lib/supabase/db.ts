@@ -1,6 +1,28 @@
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { supabase } from '@/lib/supabase/client';
 
+export type SupplierRow = {
+  id: string;
+  name: string;
+  contact_person: string | null;
+  phone: string | null;
+  whatsapp: string | null;
+  email: string | null;
+  address: string | null;
+  notes: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ShippingSettingRow = {
+  id: string;
+  setting_key: string;
+  setting_value: Record<string, unknown>;
+  updated_at: string;
+  updated_by: string | null;
+};
+
 // PRODUCTS
 export async function getProductsFromDB() {
   const { data, error } = await supabase
@@ -222,6 +244,76 @@ export async function updateSettingInDB(key: string, value: any, userId: string)
     .select()
     .single();
   
+  if (error) throw error;
+  return data;
+}
+
+// SUPPLIERS
+export async function getSuppliersFromDB() {
+  const { data, error } = await supabase
+    .from('suppliers')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function createSupplierInDB(payload: Partial<SupplierRow>) {
+  const { data, error } = await supabaseAdmin
+    .from('suppliers')
+    .insert([{ ...payload, updated_at: new Date().toISOString() }])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function updateSupplierInDB(id: string, updates: Partial<SupplierRow>) {
+  const { data, error } = await supabaseAdmin
+    .from('suppliers')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteSupplierFromDB(id: string) {
+  const { error } = await supabaseAdmin
+    .from('suppliers')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+}
+
+// SHIPPING SETTINGS
+export async function getShippingSettingsFromDB() {
+  const { data, error } = await supabase
+    .from('settings')
+    .select('*')
+    .in('setting_key', ['inside_dhaka_shipping_fee', 'outside_dhaka_shipping_fee', 'free_shipping_threshold']);
+
+  if (error) throw error;
+  return (data || []) as ShippingSettingRow[];
+}
+
+export async function upsertShippingSettingInDB(key: string, value: Record<string, unknown>, userId: string) {
+  const { data, error } = await supabaseAdmin
+    .from('settings')
+    .upsert({
+      setting_key: key,
+      setting_value: value,
+      updated_at: new Date().toISOString(),
+      updated_by: userId,
+    }, { onConflict: 'setting_key' })
+    .select()
+    .single();
+
   if (error) throw error;
   return data;
 }

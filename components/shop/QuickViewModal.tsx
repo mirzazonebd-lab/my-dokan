@@ -45,7 +45,7 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
           {/* Image */}
           <div className="relative aspect-square sm:rounded-l-3xl overflow-hidden bg-rose-50">
             <Image
-              src={product.image}
+              src={product.image || '/placeholder.png'}
               alt={product.name}
               fill
               className="object-cover"
@@ -76,10 +76,10 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
             {/* Brand & Category */}
             <div className="flex items-center gap-2 mb-2">
               <span className="text-xs font-semibold text-[#C4818A] uppercase tracking-widest">
-                {product.brand}
+                {product.brand || ''}
               </span>
               <span className="text-gray-300">·</span>
-              <span className="text-xs text-gray-400">{product.category}</span>
+              <span className="text-xs text-gray-400">{product.category || ''}</span>
             </div>
 
             {/* Name */}
@@ -95,20 +95,20 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
                     key={i}
                     size={14}
                     className={
-                      i < Math.round(product.rating)
+                      i < Math.round(product.rating ?? 0)
                         ? 'text-yellow-400 fill-yellow-400'
                         : 'text-gray-200 fill-gray-200'
                     }
                   />
                 ))}
               </div>
-              <span className="text-sm font-semibold text-[#1C1C2E]">{product.rating}</span>
-              <span className="text-xs text-gray-400">({product.totalReviews.toLocaleString()} reviews)</span>
+              <span className="text-sm font-semibold text-[#1C1C2E]">{product.rating ?? 0}</span>
+              <span className="text-xs text-gray-400">({(product.totalReviews ?? 0).toLocaleString()} reviews)</span>
             </div>
 
             {/* Description */}
             <p className="text-sm text-gray-600 leading-relaxed mb-4 line-clamp-3">
-              {product.shortDescription}
+              {product.shortDescription || ''}
             </p>
 
             {/* Skin Type */}
@@ -125,7 +125,7 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
               <span className="text-2xl font-bold text-[#1C1C2E]">
                 ৳{product.price.toLocaleString()}
               </span>
-              {product.originalPrice && (
+              {product.originalPrice ? (
                 <>
                   <span className="text-sm text-gray-400 line-through">
                     ৳{product.originalPrice.toLocaleString()}
@@ -134,7 +134,7 @@ export default function QuickViewModal({ product, onClose }: QuickViewModalProps
                     Save ৳{(product.originalPrice - product.price).toLocaleString()}
                   </span>
                 </>
-              )}
+              ) : null}
             </div>
 
             {/* Stock */}

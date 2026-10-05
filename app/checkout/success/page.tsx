@@ -14,8 +14,7 @@ const ORDERS_KEY = 'beautydokanbd_orders';
 
 const PAYMENT_LABEL: Record<string, string> = {
   cod: 'Cash on Delivery',
-  bkash: 'bKash (Manual)',
-  nagad: 'Nagad (Manual)',
+  bank: 'Bank Transfer',
 };
 
 // ─── Invoice HTML ─────────────────────────────────────────────────────────────

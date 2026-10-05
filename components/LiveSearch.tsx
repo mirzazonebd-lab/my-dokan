@@ -35,7 +35,7 @@ export default function LiveSearch({ isOpen, onClose }: LiveSearchProps) {
   const results = query.length > 1 ? {
     products: products.filter(p =>
       p.name.toLowerCase().includes(query.toLowerCase()) ||
-      p.brand.toLowerCase().includes(query.toLowerCase())
+      (p.brand || '').toLowerCase().includes(query.toLowerCase())
     ).slice(0, 4),
     categories: categories.filter(c =>
       c.name.toLowerCase().includes(query.toLowerCase())
@@ -133,7 +133,7 @@ export default function LiveSearch({ isOpen, onClose }: LiveSearchProps) {
                         className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors"
                       >
                         <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100">
-                          <Image src={product.image} alt={product.name} fill className="object-cover" />
+                          <Image src={product.image || '/placeholder.png'} alt={product.name} fill className="object-cover" />
                         </div>
                         <div className="flex-1">
                           <p className="text-sm font-medium">{product.name}</p>
